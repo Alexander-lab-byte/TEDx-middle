@@ -1,6 +1,6 @@
 import { type CSSProperties, type MouseEvent, createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ArrowLeft, ArrowRight, Check, Instagram, Linkedin, Mail, MapPin, Send, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Mail, MapPin, Send, X } from 'lucide-react';
 import { Link, Route, Router as WouterRouter, Switch, useLocation } from 'wouter';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -19,6 +19,24 @@ const LangContext = createContext<{ lang: Lang; toggle: () => void; tx: (value: 
   tx: (value) => value.en,
 });
 function useLang() { return useContext(LangContext); }
+
+function useScrollReveal(deps: unknown[] = []) {
+  useEffect(() => {
+    const elements = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
+    if (!elements.length) return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+}
 
 const navItems = [
   { href: '/#about', label: b('About', 'Бидний тухай') },
@@ -94,12 +112,24 @@ function Nav({ heroMode = false }: { heroMode?: boolean }) {
 
 function Footer() {
   const { tx } = useLang();
-  return <footer className="footer">
-    <div className="wrap footer-inner">
-      <div><Brand /><p style={{ marginTop: 14 }}>{tx(b('This independent TEDx event is operated under license from TED.', 'Энэхүү бие даасан TEDx арга хэмжээ нь TED-ийн тусгай зөвшөөрлийн дагуу зохион байгуулагдаж байна.'))}</p></div>
-      <p><strong>TEDxUlaanbaatar Empathy School Youth © 2026</strong><br />{tx(b('Ideas worth spreading, from Ulaanbaatar.', 'Түгээх үнэ цэнэтэй санаанууд, Улаанбаатараас.'))}</p>
-    </div>
-  </footer>;
+  return <>
+    <section className="map-section">
+      <iframe
+        className="map-embed"
+        title="Ulaanbaatar Empathy School location"
+        src="https://www.google.com/maps?q=Ulaanbaatar+Empathy+School,+Ulaanbaatar,+Mongolia&output=embed"
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+        allowFullScreen
+      />
+    </section>
+    <footer className="footer">
+      <div className="wrap footer-inner">
+        <div><Brand /><p style={{ marginTop: 14 }}>{tx(b('This independent TEDx event is operated under license from TED.', 'Энэхүү бие даасан TEDx арга хэмжээ нь TED-ийн тусгай зөвшөөрлийн дагуу зохион байгуулагдаж байна.'))}</p></div>
+        <p><strong>TEDxUlaanbaatar Empathy School Youth © 2026</strong><br />{tx(b('Ideas worth spreading, from Ulaanbaatar.', 'Түгээх үнэ цэнэтэй санаанууд, Улаанбаатараас.'))}</p>
+      </div>
+    </footer>
+  </>;
 }
 
 function Countdown() {
@@ -139,7 +169,7 @@ function SeatSelector() {
   const { tx } = useLang();
   const [size, setSize] = useState(23);
   const [selected, setSelected] = useState<number | null>(null);
-  const taken = useMemo(() => new Set([4, 5, 12, 13, 14, 25, 26, 44, 45, 46, 77, 78, 89]), []);
+  const taken = useMemo(() => new Set<number>([]), []);
   const seat = (number: number) => <button key={number} className={`seat ${taken.has(number) ? 'taken' : ''} ${selected === number ? 'selected' : ''}`} disabled={taken.has(number)} onClick={() => setSelected(selected === number ? null : number)} aria-label={`Seat ${number}`} data-testid={`button-seat-${number}`}>{number}</button>;
   const style = { '--seat-size': `${size}px` } as CSSProperties;
   return <div className="seat-panel reveal" id="seats">
@@ -177,11 +207,17 @@ function SpeakerModal({ speaker, close }: { speaker: { index: number; type: stri
 
 function Home() {
   const { tx } = useLang();
+  useScrollReveal();
   const speakerRef = useRef<HTMLDivElement>(null);
   const [speaker, setSpeaker] = useState<{ index: number; type: string; desc: string } | null>(null);
   const [openSession, setOpenSession] = useState<number | null>(null);
   const [messageSent, setMessageSent] = useState(false);
   const scrollSpeakers = (offset: number) => speakerRef.current?.scrollBy({ left: offset, behavior: 'smooth' });
+  const scrollToSection = (event: MouseEvent<HTMLAnchorElement>, id: string) => {
+    event.preventDefault();
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.history.replaceState(null, '', `/#${id}`);
+  };
   const sessions = [
     [b('Morning Doors & Rehearsal', 'Өглөөний бүртгэл & бэлтгэл'), '08:00 AM – 10:15 AM', [['08:00 AM – 09:00 AM', b('Team & Speaker Preparation', 'Баг болон илтгэгчдийн бэлтгэл')], ['09:30 AM – 10:15 AM', b('Registration & Check-In', 'Бүртгэл & хүлээн авалт')]]],
     [b('SESSION 1 — Local Roots & Discovery', 'ХЭСЭГ 1 — Орон нутгийн үнэ цэнэ'), '10:15 AM – 11:21 AM', [['10:15 AM', b('Opening & Welcome', 'Нээлтийн үйл ажиллагаа')], ['10:20 AM – 11:20 AM', b('Speaker Block 1 (Coming Soon)', 'Илтгэгчид 1 (тун удахгүй)')]]],
@@ -193,17 +229,17 @@ function Home() {
       <Nav heroMode />
       <main>
         <section className="hero">
-          <div className="hero-media pl-[5px] pr-[5px]" aria-hidden="true">
+          <div className="hero-media" aria-hidden="true">
             <video autoPlay muted loop playsInline preload="metadata" poster={`${media}school-campus-cinematic.png`}>
               <source src={`${media}school-hero.mp4`} type="video/mp4" />
             </video>
           </div>
-          <div className="wrap hero-content text-[24px] ml-[660px] mr-[660px]">
+          <div className="wrap hero-content">
             <h1 className="hero-opening-title">{tx(b('TEDx Ulaanbaatar Empathy School Youth 2026', 'TEDx Улаанбаатар Эмпати Сургуулийн Залуус 2026'))}</h1>
             <div className="hero-center-mark reveal"><img src={`${media}tedx-ub-empathy-white.png`} alt="TEDx Ulaanbaatar Empathy School Youth" /></div>
             <p className="hero-intro reveal delay-1">{tx(b('8 voices. 100 seats. One day of live student ideas, teacher perspectives, and youth-led innovation in Ulaanbaatar.', '8 дуу хоолой. 100 суудал. Улаанбаатар хотын сурагчдын идэвхи санаачилга, багш нарын үзэл бодол, залуусын инновацийг түгээх нэг өдөр.'))}</p>
             <Countdown />
-            <div className="hero-row reveal delay-2"><Link href="/#seats" className="button" data-testid="link-hero-reserve">{tx(b('Reserve your seat', 'Суудлаа захиалах'))}</Link><Link href="/#speakers" className="button ghost" data-testid="link-hero-speakers">{tx(b('Meet the speakers', 'Илтгэгчидтэй танилцах'))}</Link></div>
+            <div className="hero-row reveal delay-2"><Link href="/#seats" onClick={(event) => scrollToSection(event, 'seats')} className="button" data-testid="link-hero-reserve">{tx(b('Reserve your seat', 'Суудлаа захиалах'))}</Link><Link href="/#speakers" onClick={(event) => scrollToSection(event, 'speakers')} className="button ghost" data-testid="link-hero-speakers">{tx(b('Meet the speakers', 'Илтгэгчидтэй танилцах'))}</Link></div>
             <div className="hero-meta reveal delay-3"><span>{tx(b('Saturday, October 24, 2026', '2026 оны 10-р сарын 24, Бямба гараг'))}</span><b>•</b>{tx(b('Ulaanbaatar Empathy School, Mongolia', 'Улаанбаатар Эмпати Сургууль, Монгол'))}</div>
           </div>
         </section>
@@ -219,7 +255,20 @@ function Home() {
          </section>
           <section className="section" id="speakers"><div className="wrap reveal"><div className="eyebrow">{tx(b('02 / On Stage', '02 / Тайзнаа'))}</div><h2 className="section-title">{tx(b('8 Live Speakers', '8 Илтгэгч'))}</h2><div className="speakers-head"><div className="pills"><span className="pill"><b>4</b>{tx(b('Student Speakers', 'Сурагч илтгэгч'))}</span><span className="pill"><b>2</b>{tx(b('Local Teachers', 'Багш нар'))}</span><span className="pill"><b>2</b>{tx(b('External Speakers', 'Зочин илтгэгч'))}</span></div><div className="scroll-buttons"><button className="icon-button" onClick={() => scrollSpeakers(-260)} aria-label="Scroll speakers left" data-testid="button-speakers-left"><ArrowLeft size={16} /></button><button className="icon-button" onClick={() => scrollSpeakers(260)} aria-label="Scroll speakers right" data-testid="button-speakers-right"><ArrowRight size={16} /></button></div></div><div className="speaker-scroll" ref={speakerRef}>{speakers.map(([type, desc], index) => <button className="speaker-card" key={`${type}-${index}`} onClick={() => setSpeaker({ index: index + 1, type, desc })} data-testid={`button-speaker-${index + 1}`}><div className="speaker-avatar">?</div><div className="speaker-type">{type}</div><div className="speaker-name">{tx(b(`Speaker #${String(index + 1).padStart(2, '0')}`, `Илтгэгч #${String(index + 1).padStart(2, '0')}`))}</div><p className="speaker-desc">{desc}</p></button>)}</div></div></section>
          <section className="section schedule" id="schedule"><div className="wrap reveal"><div className="eyebrow">{tx(b('03 / Timetable', '03 / Цагийн хуваарь'))}</div><h2 className="section-title">{tx(b('Event Schedule (Coming Soon)', 'Арга хэмжээний хөтөлбөр (Тун удахгүй)'))}</h2><p className="muted">{tx(b('Click on a session below to view details.', 'Доорх хэсэгт дарж дэлгэрэнгүй хуваарийг харна уу.'))}</p><div className="schedule-list">{sessions.map(([title, time, rows], index) => <div className={`session ${openSession === index ? 'open' : ''}`} key={title.en}><button className="session-header" onClick={() => setOpenSession(openSession === index ? null : index)} aria-expanded={openSession === index} data-testid={`button-schedule-${index}`}><div><h3>{tx(title)}</h3><span className="session-badge">{time}</span></div><span className="toggle">{openSession === index ? '−' : '+'}</span></button><div className="session-items">{rows.map(([rowTime, event]) => <div className="schedule-row" key={rowTime}><div className="time">{rowTime}</div><div className="event">{tx(event)}</div></div>)}</div></div>)}</div></div></section>
-          <section className="section" id="contact"><div className="wrap reveal"><div className="eyebrow">{tx(b('04 / Get In Touch', '04 / Холбоо барих'))}</div><h2 className="section-title">{tx(b('Reach Out to Our Team', 'Бидэнтэй холбогдох'))}</h2><div className="contact-grid"><div className="info-card"><h3>{tx(b('Organizers', 'Зохион байгуулагчид'))}</h3><div className="organizer"><div><strong>Munkhtushig</strong><p>{tx(b('Organizer / strategic operations', 'Зохион байгуулагч / стратеги'))}</p></div><span>01</span></div><div className="organizer"><div><strong>Munkherdene</strong><p>{tx(b('Co-organizer / venue execution', 'Хамтран зохион байгуулагч / талбай'))}</p></div><span>02</span></div><div className="socials"><a href="mailto:hello@tedxubempathy.school"><Mail size={14} />Email</a><a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><Instagram size={14} />Instagram</a><a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><Linkedin size={14} />LinkedIn</a></div></div><div className="form-card"><h3>{tx(b('Send a Message', 'Зурвас илгээх'))}</h3><form onSubmit={(event) => { event.preventDefault(); setMessageSent(true); event.currentTarget.reset(); window.setTimeout(() => setMessageSent(false), 4500); }}><div className="form-field"><label htmlFor="fullName">{tx(b('Your Name', 'Таны нэр'))}</label><input id="fullName" required placeholder={tx(b('e.g. Anujin Batbayar', 'Жнь: Анужин Батбаяр'))} data-testid="input-full-name" /></div><div className="form-field"><label htmlFor="emailAddress">{tx(b('Email Address', 'И-мэйл хаяг'))}</label><input id="emailAddress" type="email" required placeholder="name@example.com" data-testid="input-email" /></div><div className="form-field"><label htmlFor="message">{tx(b('Message / Question', 'Таны зурвас'))}</label><textarea id="message" rows={4} required placeholder={tx(b('How can we help you?', 'Бид танд хэрхэн туслах вэ?'))} data-testid="input-message" /></div><button className="button" type="submit" data-testid="button-send-message"><Send size={15} />{tx(b('Send Message', 'Илгээх'))}</button>{messageSent && <div className="form-success" data-testid="status-message-sent"><Check size={15} /> {tx(b("Message received! We'll reply shortly.", 'Зурвас хүлээн авлаа! Бид удахгүй хариу өгөх болно.'))}</div>}</form></div></div></div></section>
+          <section className="section" id="contact"><div className="wrap reveal"><div className="eyebrow">{tx(b('04 / Get In Touch', '04 / Холбоо барих'))}</div><h2 className="section-title">{tx(b('Reach Out to Our Team', 'Бидэнтэй холбогдох'))}</h2><div className="contact-grid"><div className="info-card"><h3>{tx(b('Organizers', 'Зохион байгуулагчид'))}</h3><div className="organizer"><div><strong>Munkhtushig</strong><p>{tx(b('Organizer / strategic operations', 'Зохион байгуулагч / стратеги'))}</p></div><span>01</span></div><div className="organizer"><div><strong>Munkherdene</strong><p>{tx(b('Co-organizer / venue execution', 'Хамтран зохион байгуулагч / талбай'))}</p></div><span>02</span></div><div className="socials"><a href="mailto:hello@tedxubempathy.school"><Mail size={14} />Email</a></div></div><div className="form-card"><h3>{tx(b('Send a Message', 'Зурвас илгээх'))}</h3><form onSubmit={(event) => {
+              event.preventDefault();
+              const form = event.currentTarget;
+              const data = new FormData(form);
+              const name = String(data.get('fullName') ?? '');
+              const emailAddress = String(data.get('emailAddress') ?? '');
+              const message = String(data.get('message') ?? '');
+              const subject = encodeURIComponent(`TEDx Ulaanbaatar website message from ${name}`);
+              const body = encodeURIComponent(`Name: ${name}\nEmail: ${emailAddress}\n\nMessage:\n${message}`);
+              window.location.href = `mailto:Sergelenmunkhtushig@gmail.com?subject=${subject}&body=${body}`;
+              setMessageSent(true);
+              form.reset();
+              window.setTimeout(() => setMessageSent(false), 4500);
+            }}><div className="form-field"><label htmlFor="fullName">{tx(b('Your Name', 'Таны нэр'))}</label><input id="fullName" name="fullName" required placeholder={tx(b('e.g. Anujin Batbayar', 'Жнь: Анужин Батбаяр'))} data-testid="input-full-name" /></div><div className="form-field"><label htmlFor="emailAddress">{tx(b('Email Address', 'И-мэйл хаяг'))}</label><input id="emailAddress" name="emailAddress" type="email" required placeholder="name@example.com" data-testid="input-email" /></div><div className="form-field"><label htmlFor="message">{tx(b('Message / Question', 'Таны зурвас'))}</label><textarea id="message" name="message" rows={4} required placeholder={tx(b('How can we help you?', 'Бид танд хэрхэн туслах вэ?'))} data-testid="input-message" /></div><button className="button" type="submit" data-testid="button-send-message"><Send size={15} />{tx(b('Send Message', 'Илгээх'))}</button>{messageSent && <div className="form-success" data-testid="status-message-sent"><Check size={15} /> {tx(b("Message received! We'll reply shortly.", 'Зурвас хүлээн авлаа! Бид удахгүй хариу өгөх болно.'))}</div>}</form></div></div></div></section>
        </main>
       <Footer />
       <SpeakerModal speaker={speaker} close={() => setSpeaker(null)} />
@@ -229,6 +278,7 @@ function Home() {
 
 function Library() {
   const { tx } = useLang();
+  useScrollReveal();
   return <><Nav /><main className="page-main talks-page"><div className="wrap"><div className="coming-soon-wrapper reveal"><h1 className="aesthetic-text">{tx(b('Coming Soon', 'Тун удахгүй'))}</h1><p className="coming-soon-sub">{tx(b('The full library of live ideas, student talks, and inspiration will be unlocked right here after the event concludes.', 'Арга хэмжээ дууссаны дараа сурагчдын болон зочдын бүх илтгэлийн бичлэгүүд энд байрших болно.'))}</p></div></div></main><Footer /></>;
 }
 
@@ -246,6 +296,7 @@ const teamMembers = [
 function Team() {
   const { tx } = useLang();
   const [filter, setFilter] = useState('all');
+  useScrollReveal([filter]);
   const departments: [string, Bilingual][] = [['leadership', b('Leadership', 'Удирдлага')], ['curation', b('Curation', 'Куратор')], ['media-design', b('Media & Design', 'Медиа ба Дизайн')], ['logistics', b('Logistics', 'Логистик')]];
   const visible = filter === 'all' ? teamMembers : teamMembers.filter((member) => member.dept === filter);
   return <><Nav /><main className="page-main team-page"><section className="team-hero"><div className="wrap team-hero-grid reveal"><div className="team-hero-copy"><div className="eyebrow">{tx(b('Behind the Stage', 'Тайзны ард'))}</div><h1>{tx(b('Meet the ', 'Зохион байгуулах багтай '))}<em>{tx(b('visionaries.', 'танилц.'))}</em></h1><p>{tx(b('The dedicated team working behind the scenes to make this event happen.', 'Энэхүү эвэнтэд зориулан тайзны ард ажиллаж буй манай баг хамт олон.'))}</p></div><aside className="team-hero-note"><div className="team-note-index">01 — 04</div><div className="team-note-line" /><p>{tx(b('A student-led crew building a room for ideas, one detail at a time.', 'Санаа бүрт зориулсан орон зайг нарийн ширийн зүйл бүрээр бүтээж буй сурагчдын баг.'))}</p><div className="team-note-meta"><span>TEDx Ulaanbaatar</span><strong>Empathy School Youth</strong></div></aside></div><div className="wrap"><div className="stats"><div className="stat"><strong>?</strong><span>{tx(b('Total members', 'Нийт гишүүд'))}</span></div><div className="stat"><strong>04</strong><span>{tx(b('Departments', 'Албадууд'))}</span></div><div className="stat"><strong>100%</strong><span>{tx(b('Volunteer driven', 'Сайн дурын баг'))}</span></div><div className="stat"><strong>2026</strong><span>{tx(b('Edition team', '2026 оны баг'))}</span></div></div></div></section><div className="filter-bar"><div className="wrap"><div className="filters"><button className={`filter ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')} data-testid="button-filter-all">{tx(b('All Departments', 'Бүх алба'))}</button>{departments.map(([id, label]) => <button key={id} className={`filter ${filter === id ? 'active' : ''}`} onClick={() => setFilter(id)} data-testid={`button-filter-${id}`}>{tx(label)}</button>)}</div></div></div><div className="wrap team-content"><div className="team-intro-row"><div className="eyebrow">{tx(b('Organizing core', 'Зохион байгуулах баг'))}</div><p>{tx(b('Meet the people turning one shared idea into a full day of voices, movement, and connection.', 'Нэг санааг дуу хоолой, хөдөлгөөн, харилцаагаар дүүрэн бүтэн өдөр болгон хувиргаж буй хүмүүстэй танилцаарай.'))}</p></div>{departments.filter(([id]) => filter === 'all' || id === filter).map(([id, label]) => { const members = visible.filter((member) => member.dept === id); return <section className="dept" key={id}><div className="dept-heading"><h2>{tx(label)}</h2><i /><span>{members.length} {tx(b('Members', 'Гишүүн'))}</span></div><div className="roster-list">{members.map((member, index) => <article className="roster-member" key={`${id}-${index}`}><div className="roster-index">{String(index + 1).padStart(2, '0')}</div><div className="roster-initials" aria-hidden="true">{member.name === '?' ? '?' : member.name.slice(0, 1)}</div><div className="roster-person"><div className="member-role">{tx(member.role)}</div><h3>{member.name}</h3></div><p className="roster-bio">{tx(member.bio)}</p><span className="roster-arrow" aria-hidden="true">↗</span></article>)}</div></section>; })}</div></main><Footer /></>;
@@ -253,6 +304,7 @@ function Team() {
 
 function Apply() {
   const { tx } = useLang();
+  useScrollReveal();
   return <><Nav /><main className="page-main"><section className="page-hero"><div className="wrap reveal"><div className="eyebrow">{tx(b('Applications & Recruitment', 'Илтгэгч ба багийн бүртгэл'))}</div><h1>{tx(b('Put your idea in the room.', 'Санаагаа танхимд авчир.'))}</h1><p>{tx(b('Choose an application below to apply as a speaker or join the organizing team for 2026.', '2026 оны TEDx арга хэмжээнд илтгэгчээр оролцох эсвэл зохион байгуулах багт нэгдэх анкет.'))}</p></div></section><section className="section" style={{ paddingTop: 25 }}><div className="wrap"><div className="apply-grid"><article className="apply-card"><div><span className="badge">{tx(b('Stage call', 'Илтгэгчийн урилга'))}</span><h2>{tx(b('Speaker Application', 'Илтгэгчийн анкет'))}</h2><p>{tx(b('Have an idea worth spreading? We are looking for student leaders, educators, and visionaries to share ideas live on stage.', 'Та залууст хүргэх үнэ цэнэтэй санаатай юу? Тайзан дээр илтгэл тавих сурагчид, багш нар болон зочдыг урьж байна.'))}</p></div><a className="button" href="https://docs.google.com/forms/d/e/1FAIpQLSeDVXkHyLZ36OvnBQ0OesNOzop77LhwibkIZZxv4QJeupXg6w/viewform?usp=header" target="_blank" rel="noopener noreferrer" data-testid="link-apply-speaker">{tx(b('Apply as Speaker', 'Илтгэгчээр бүртгүүлэх'))}<ArrowRight size={15} /></a></article><article className="apply-card"><div><span className="badge">{tx(b('Organizing core', 'Зохион байгуулах баг'))}</span><h2>{tx(b('Team Recruitment', 'Багийн гишүүний анкет'))}</h2><p>{tx(b('Join our student team across Media & Design, Stage & Technical, and Logistics departments to bring TEDx to life.', 'Медиа, Дизайн, Техник болон Ложистикийн багт нэгдэж TEDx арга хэмжээг хамтдаа бүтээгээрэй.'))}</p></div><a className="button" href="https://docs.google.com/forms/d/e/1FAIpQLSfuZkbisjE0HeH8m-O9R7mwU2li7bBOOlNYU4jC1OtDca1U9Q/viewform?usp=header" target="_blank" rel="noopener noreferrer" data-testid="link-apply-team">{tx(b('Join the Team', 'Багт нэгдэх'))}<ArrowRight size={15} /></a></article></div><div className="footer-cta"><h2>{tx(b('Ready to leave your mark?', 'Өөрийн мөрийг үлдээхэд бэлэн үү?'))}</h2><p>{tx(b('Whether you have an idea worth spreading or want to help build the event behind the scenes, we want you on board.', 'Та тайзан дээр илтгэл тавих эсвэл зохион байгуулах багт нэгдэхийг хүссэн ч бид таныг урьж байна.'))}</p></div></div></section></main><Footer /></>;
 }
 
