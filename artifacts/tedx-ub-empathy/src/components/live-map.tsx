@@ -2,14 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 
 // MONTE Ballroom, on Zaisan Toiruu near the Lights Residence Town complex,
 // south of Zaisan Monument, Khan-Uul District, Ulaanbaatar.
-// Estimated by triangulating off the Zaisan Monument's known coordinates
-// and the pin's position on the Google Maps screenshot the venue sent —
-// close, but not pixel-exact. For the precise pin: open the location in
-// Google Maps, long-press (or right-click) directly on the marker, and
-// send the lat/lng that pops up — then just swap the two numbers below.
+// Decoded from the venue's Plus Code (VWJ6+VH Ulaanbaatar), which resolves
+// to a ~14m x 14m cell — accurate to the building, not just the district.
 export const SCHOOL_LOCATION = {
-  lat: 47.8812,
-  lng: 106.9088,
+  lat: 47.8822,
+  lng: 106.9114,
   name: 'MONTE Ballroom',
 };
 
