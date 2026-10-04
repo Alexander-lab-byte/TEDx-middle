@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 
-// Approximate coordinates for central Ulaanbaatar.
-// Swap these for MONTE Ballroom's exact latitude/longitude once known —
-// nothing else in this component needs to change.
+// Approximate coordinates for Khan-Uul District, 11th khoroo (postal code
+// 17023), Ulaanbaatar — the HUD area where MONTE Ballroom is located.
+// This is a district-level estimate, not the exact building pin. Swap in
+// the precise latitude/longitude once you have it (drop a pin on Google
+// Maps at the venue and copy the coordinates from the URL) — nothing else
+// in this component needs to change.
 export const SCHOOL_LOCATION = {
-  lat: 47.9203,
-  lng: 106.963,
+  lat: 47.8886,
+  lng: 106.9247,
   name: 'MONTE Ballroom',
 };
 
