@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 
-// Approximate coordinates for Bayanzurkh District, Ulaanbaatar.
-// Swap these for the school's exact latitude/longitude once surveyed —
+// Approximate coordinates for central Ulaanbaatar.
+// Swap these for MONTE Ballroom's exact latitude/longitude once known —
 // nothing else in this component needs to change.
 export const SCHOOL_LOCATION = {
   lat: 47.9203,
   lng: 106.963,
-  name: 'Ulaanbaatar Empathy School',
+  name: 'MONTE Ballroom',
 };
 
 const LEAFLET_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
