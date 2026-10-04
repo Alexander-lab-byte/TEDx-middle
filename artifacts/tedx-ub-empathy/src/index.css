@@ -325,3 +325,102 @@ a { color: inherit; text-decoration: none; }
   .roster-person h3 { font-size: 17px; }
   .roster-member:hover { padding-inline: 10px; }
 }
+/* --- Phase 6: photo-aware avatars, modals, live map, deadline card --- */
+
+.speaker-avatar.has-photo,
+.roster-initials.has-photo,
+.modal-avatar.has-photo {
+  overflow: hidden;
+  padding: 0;
+  background: #22262e;
+}
+.speaker-avatar.has-photo img,
+.roster-initials.has-photo img,
+.modal-avatar.has-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.modal-avatar {
+  display: grid;
+  place-items: center;
+  width: 86px;
+  height: 86px;
+  margin-bottom: 4px;
+  border: 1px solid var(--line);
+  background: radial-gradient(circle at 60% 35%, rgba(235, 0, 40, 0.3), transparent 45%), #22262e;
+  color: var(--ted-hi);
+  font: 900 32px var(--app-font-mono);
+}
+.modal-photo { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+
+/* Roster cards became buttons so they can open the detail modal; undo the
+   browser's default button chrome and keep the existing grid/hover rules. */
+.roster-member {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.roster-member:focus-visible { outline: 2px solid var(--ted-hi); outline-offset: 4px; }
+
+/* Live geolocation map (Leaflet canvas replaces the old static iframe) */
+.map-frame-sub { margin: 0; color: var(--muted); font-size: 13px; max-width: 480px; }
+.live-map { display: grid; gap: 14px; }
+.live-map-canvas {
+  width: 100%;
+  height: 420px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #1b1e23;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.live-map-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.live-map-status { font-size: 12.5px; font-weight: 600; }
+.live-map-status.ok { color: var(--ted-hi); }
+.live-map-status.warn { color: var(--muted); }
+.map-pin { display: block; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.35); }
+.map-pin-school { background: var(--ted); }
+.map-pin-user { background: #2ab6ff; }
+@media (max-width: 650px) {
+  .live-map-canvas { height: 280px; border-radius: 12px; }
+}
+
+/* Apply portal: application deadline card */
+.deadline-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 22px;
+  padding: 14px 18px;
+  border: 1px solid var(--line);
+  background: rgba(8, 9, 11, 0.4);
+  border-radius: 14px;
+}
+.deadline-info { display: flex; align-items: center; gap: 14px; }
+.deadline-badge {
+  padding: 5px 11px;
+  border-radius: 999px;
+  font: 700 10px var(--app-font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.deadline-badge.open { background: rgba(46, 204, 113, 0.18); color: #52d88a; border: 1px solid rgba(82, 216, 138, 0.4); }
+.deadline-badge.warn { background: rgba(235, 158, 0, 0.18); color: #f0b23e; border: 1px solid rgba(240, 178, 62, 0.4); }
+.deadline-badge.closed { background: rgba(235, 0, 40, 0.18); color: var(--ted-hi); border: 1px solid rgba(235, 0, 40, 0.4); }
+.deadline-text { display: flex; flex-direction: column; gap: 2px; }
+.deadline-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.deadline-date { font-weight: 700; font-size: 14px; color: var(--white); }
+.deadline-countdown { margin-left: auto; font: 700 12.5px var(--app-font-mono); color: var(--muted); }
+@media (max-width: 650px) {
+  .deadline-card { flex-direction: column; align-items: flex-start; }
+  .deadline-countdown { margin-left: 0; }
+}
