@@ -352,16 +352,11 @@ a { color: inherit; text-decoration: none; }
   padding: 0;
   background: #22262e;
 }
+/* Speaker and team photos show the whole original image — no
+   cropping/zooming — letterboxed on the card's own dark background when
+   the aspect ratio doesn't match exactly. */
 .roster-initials.has-photo img,
-.modal-avatar.has-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-/* Speaker photos show the whole original image — no cropping/zooming —
-   letterboxed on the card's own dark background when the aspect ratio
-   doesn't match exactly. */
+.modal-avatar.has-photo img,
 .speaker-avatar.has-photo img {
   width: 100%;
   height: 100%;
