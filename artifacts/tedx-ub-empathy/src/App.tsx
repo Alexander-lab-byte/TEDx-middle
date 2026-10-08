@@ -197,8 +197,26 @@ const announcedSoon = b('Speaker to be announced.', 'Илтгэгч тун уд�
 // and 4 guest speakers. Only confirmed speakers carry a name/photo/bio —
 // the rest render as "to be announced" placeholders until finalized.
 const speakers: SpeakerInfo[] = [
-  { category: 'internal', type: speakerCategoryLabel.internal, desc: announcedSoon },
-  { category: 'internal', type: speakerCategoryLabel.internal, desc: announcedSoon },
+  {
+    category: 'internal',
+    type: speakerCategoryLabel.internal,
+    name: 'Dalai Davaadorj',
+    photo: speakerPhoto('dalai-davaadorj.jpg'),
+    desc: b(
+      "A student at Ulaanbaatar Empathy School, content creator, and aspiring psychology student who enjoys documenting life and connecting with others — always chasing new challenges that push outside the comfort zone.",
+      'Улаанбаатар Эмпати Сургуулийн сурагч, контент бүтээгч, сэтгэл судлалын чиглэлээр суралцахыг хүсдэг. Амьдралаа баримтжуулж, хүмүүстэй харилцахдаа дуртай бөгөөд тав тухаа орхиж шинэ сорилтуудыг эрэлхийлдэг.',
+    ),
+  },
+  {
+    category: 'internal',
+    type: speakerCategoryLabel.internal,
+    name: 'Gan-Udram Ganbat',
+    photo: speakerPhoto('gan-udram-ganbat.jpg'),
+    desc: b(
+      'Pianist of nearly 10 years with a strong interest in astronomy and astrophysics.',
+      'Бараг 10 жилийн турш төгөлдөр хуур тоглодог бөгөөд одон орон судлал, астрофизикт сонирхолтой.',
+    ),
+  },
   { category: 'internal', type: speakerCategoryLabel.internal, desc: announcedSoon },
   { category: 'internal', type: speakerCategoryLabel.internal, desc: announcedSoon },
   {
@@ -385,7 +403,7 @@ const teamMembers: TeamMemberInfo[] = [
   { dept: 'technical-stage', role: b('Stage Management', 'Тайзны менежмент'), name: '?', bio: b('Team member to be revealed soon.', 'Багийн гишүүн удахгүй зарлагдана.') },
   { dept: 'curation', role: b('Curation Team Lead', 'Куратор багийн ахлагч'), name: 'M. Ariunjargal', photo: teamPhoto('ariunjargal.jpg'), bio: b('Team member to be revealed soon.', 'Багийн гишүүн удахгүй зарлагдана.') },
   { dept: 'curation', role: b('Curation Team', 'Куратор баг'), name: '?', bio: b('Team member to be revealed soon.', 'Багийн гишүүн удахгүй зарлагдана.') },
-  { dept: 'marketing', role: b('Designer', 'Дизайнер'), name: 'Munkhjin', bio: b('Directing visual branding, digital media assets, stage production aesthetics, and creative direction.', 'Арга хэмжээний визуал брэнд, дижитал контент, тайзны дизайн болон бүтээлч чиглэлийг хариуцагч.') },
+  { dept: 'marketing', role: b('Marketing Lead', 'Маркетингийн ахлагч'), name: 'Ch. Munkhjin', photo: teamPhoto('munkhjin.jpg'), bio: b('Directing visual branding, digital media assets, stage production aesthetics, and creative direction.', 'Арга хэмжээний визуал брэнд, дижитал контент, тайзны дизайн болон бүтээлч чиглэлийг хариуцагч.') },
   { dept: 'marketing', role: b('Marketing Team', 'Маркетингийн баг'), name: '?', bio: b('Team member to be revealed soon.', 'Багийн гишүүн удахгүй зарлагдана.') },
   { dept: 'logistics', role: b('Logistics Lead', 'Логистикийн ахлагч'), name: 'S. Munkhtushig', photo: teamPhoto('munkhtushig.jpg'), bio: b('Also leading logistics planning and on-the-ground operations for the event.', 'Арга хэмжээний логистик төлөвлөлт болон газар дээрх үйл ажиллагааг давхар хариуцагч.') },
   { dept: 'logistics', role: b('Operations', 'Үйл ажиллагаа'), name: '?', bio: b('Team member to be revealed soon.', 'Багийн гишүүн удахгүй зарлагдана.') },
