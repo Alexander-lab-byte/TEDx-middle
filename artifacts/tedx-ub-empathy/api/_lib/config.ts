@@ -28,7 +28,7 @@ export const config = {
   // Public site URL used to build the return link, e.g. https://www.tedxulaanbaatarempathyschoolyouth.com
   siteUrl: () => required('SITE_URL').replace(/\/$/, ''),
   ticketPrice: () => {
-    const price = Number(process.env.TICKET_PRICE_MNT || 25000);
+    const price = Number(process.env.TICKET_PRICE_MNT || 30000);
     if (!Number.isInteger(price) || price <= 0) throw new Error('TICKET_PRICE_MNT must be a positive integer');
     return price;
   },
