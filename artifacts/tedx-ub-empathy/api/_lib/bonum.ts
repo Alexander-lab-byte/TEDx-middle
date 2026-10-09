@@ -2,6 +2,7 @@
 // Docs: https://psp.bonum.mn/bonum-gateway-apis.html
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { config } from './config.js';
+import { loadBonumToken, saveBonumToken } from './db.js';
 
 interface TokenResponse {
   accessToken: string;
@@ -10,39 +11,89 @@ interface TokenResponse {
   refreshExpiresIn: number;
 }
 
-// Bonum rate-limits token creation ("Use previous token"), so keep the token
-// for as long as this server instance stays warm.
-let cached: { access: string; accessUntil: number; refresh: string; refreshUntil: number } | null = null;
+// Bonum rate-limits token creation ("Use previous token. Do not get token too
+// frequently."). Tokens are kept in memory for this instance and in Supabase so
+// every instance shares one; a new token is only requested when both are stale.
+type Cached = { access: string; accessUntil: number; refresh: string; refreshUntil: number };
+let memory: Cached | null = null;
 
-function remember(t: TokenResponse) {
+const SAFETY_MS = 60_000;
+
+function fromResponse(t: TokenResponse): Cached {
   const now = Date.now();
-  cached = {
+  return {
     access: t.accessToken,
-    accessUntil: now + (t.expiresIn - 60) * 1000,
+    accessUntil: now + t.expiresIn * 1000 - SAFETY_MS,
     refresh: t.refreshToken,
-    refreshUntil: now + (t.refreshExpiresIn - 60) * 1000,
+    refreshUntil: now + t.refreshExpiresIn * 1000 - SAFETY_MS,
   };
-  return t.accessToken;
 }
 
-async function getAccessToken(): Promise<string> {
-  const now = Date.now();
-  if (cached && cached.accessUntil > now) return cached.access;
-  const base = config.bonumBase();
-  if (cached && cached.refreshUntil > now) {
-    const res = await fetch(`${base}/bonum-gateway/ecommerce/auth/refresh`, {
-      headers: { Authorization: `Bearer ${cached.refresh}` },
-    });
-    if (res.ok) return remember((await res.json()) as TokenResponse);
+async function loadShared(): Promise<Cached | null> {
+  try {
+    const row = await loadBonumToken();
+    if (!row) return null;
+    return {
+      access: row.access_token,
+      accessUntil: new Date(row.access_expires_at).getTime(),
+      refresh: row.refresh_token,
+      refreshUntil: new Date(row.refresh_expires_at).getTime(),
+    };
+  } catch (error) {
+    console.warn('Could not read shared Bonum token', error);
+    return null;
   }
+}
+
+async function store(c: Cached): Promise<string> {
+  memory = c;
+  await saveBonumToken({
+    access_token: c.access,
+    access_expires_at: new Date(c.accessUntil).toISOString(),
+    refresh_token: c.refresh,
+    refresh_expires_at: new Date(c.refreshUntil).toISOString(),
+  }).catch((error) => console.warn('Could not save shared Bonum token', error));
+  return c.access;
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function getAccessToken(): Promise<string> {
+  if (memory && memory.accessUntil > Date.now()) return memory.access;
+
+  const shared = await loadShared();
+  if (shared && shared.accessUntil > Date.now()) {
+    memory = shared;
+    return shared.access;
+  }
+
+  const base = config.bonumBase();
+  const known = shared ?? memory;
+  if (known && known.refreshUntil > Date.now()) {
+    const res = await fetch(`${base}/bonum-gateway/ecommerce/auth/refresh`, {
+      headers: { Authorization: `Bearer ${known.refresh}` },
+    });
+    if (res.ok) return store(fromResponse((await res.json()) as TokenResponse));
+  }
+
   const res = await fetch(`${base}/bonum-gateway/ecommerce/auth/create`, {
     headers: {
       Authorization: `AppSecret ${config.bonumAppSecret()}`,
       'X-TERMINAL-ID': config.bonumTerminalId(),
     },
   });
-  if (!res.ok) throw new Error(`Bonum auth failed: ${res.status} ${await res.text()}`);
-  return remember((await res.json()) as TokenResponse);
+  if (res.ok) return store(fromResponse((await res.json()) as TokenResponse));
+
+  if (res.status === 429) {
+    // Another instance probably just got a token; wait briefly and use theirs.
+    await sleep(1500);
+    const again = await loadShared();
+    if (again && again.accessUntil > Date.now()) {
+      memory = again;
+      return again.access;
+    }
+  }
+  throw new Error(`Bonum auth failed: ${res.status} ${await res.text()}`);
 }
 
 export interface CreateInvoiceInput {
