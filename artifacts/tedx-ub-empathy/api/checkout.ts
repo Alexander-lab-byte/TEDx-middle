@@ -1,12 +1,12 @@
 // POST /api/checkout — hold a seat and create a Bonum (QPay) invoice.
-// Body: { seat, name, phone, email, school, lang? }
+// Body: { seat, name, phone, email, school, agree: true, lang? }  (agree = accepted the ticket terms)
 // Returns: { followUpLink, transactionId } — the browser is sent to followUpLink to pay.
 import { randomUUID } from 'node:crypto';
 import { createInvoice } from './_lib/bonum.js';
 import { config, HOLD_SECONDS, json, TOTAL_SEATS } from './_lib/config.js';
 import { markUnpaid, reserveSeat, setInvoiceId } from './_lib/db.js';
 
-type Field = 'seat' | 'name' | 'phone' | 'email' | 'school';
+type Field = 'seat' | 'name' | 'phone' | 'email' | 'school' | 'terms';
 
 function clean(value: unknown, max: number): string {
   return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ').slice(0, max) : '';
@@ -33,6 +33,8 @@ export async function POST(request: Request): Promise<Response> {
   if (!/^\+?[0-9 ()-]{8,20}$/.test(phone)) invalid.push('phone');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) invalid.push('email');
   if (!school) invalid.push('school');
+  // Buyers must accept the ticket terms (non-refundable) before paying.
+  if (input.agree !== true) invalid.push('terms');
   if (invalid.length) return json({ error: 'invalid_fields', fields: invalid }, 400);
 
   const transactionId = randomUUID();
