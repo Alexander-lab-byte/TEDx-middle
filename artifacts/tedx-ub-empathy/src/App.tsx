@@ -147,7 +147,7 @@ function Footer({ showMap = false }: { showMap?: boolean }) {
     <footer className="footer">
       <div className="wrap footer-inner">
         <div><Brand /><p style={{ marginTop: 14 }}>{tx(b('This independent TEDx event is operated under license from TED.', 'Энэхүү бие даасан TEDx арга хэмжээ нь TED-ийн тусгай зөвшөөрлийн дагуу зохион байгуулагдаж байна.'))}</p></div>
-        <p><strong>TEDxUlaanbaatar Empathy School Youth © 2026</strong><br />{tx(b('Ideas worth spreading, from Ulaanbaatar.', 'Түгээх үнэ цэнэтэй санаанууд, Улаанбаатараас.'))}</p>
+        <p><strong>TEDxUlaanbaatar Empathy School Youth © 2026</strong><br />{tx(b('Ideas worth spreading, from Ulaanbaatar.', 'Түгээх үнэ цэнэтэй санаанууд, Улаанбаатараас.'))}<br /><span className="footer-credit">{tx(b('Website by Anar Bayanjargal', 'Вэбсайтыг бүтээсэн: Анар Баянжаргал'))}</span></p>
       </div>
     </footer>
   </>;
@@ -220,7 +220,7 @@ const speakers: SpeakerInfo[] = [
   {
     category: 'internal',
     type: speakerCategoryLabel.internal,
-    name: 'Anarsaikhan',
+    name: 'Anarsaikhan Ariunbat',
     photo: speakerPhoto('anarsaikhan.jpg'),
     desc: b(
       'A Mongolian high school student passionate about space science, aerospace engineering, science, and technology — learning by building with his own hands through rocketry, electronics, and 3D-printing projects, with the goal of contributing to the growth of Mongolia\'s space technology sector.',
@@ -555,7 +555,7 @@ interface TeamMemberInfo {
 const teamMembers: TeamMemberInfo[] = [
   { dept: 'leadership', role: b('Licensee & Lead Organizer', 'Франчайз эзэмшигч ба ахлах зохион байгуулагч'), name: 'Munkhtushig Sergelen', photo: teamPhoto('munkhtushig.jpg'), bio: b('Directing strategic operations, licensing compliance, and overarching vision for the event.', 'Арга хэмжээний стратеги, франчайз зөвшөөрөл болон ерөнхий чиглэлийг удирдан чиглүүлэгч.') },
   { dept: 'leadership', role: b('Co-Organizer', 'Хамтран зохион байгуулагч'), name: 'Munkh-Erdene Ganbold', photo: teamPhoto('munkherdene.jpg'), bio: b('Coordinating department workflows, operational planning, and venue execution.', 'Албадын үйл ажиллагаа, операци төлөвлөлт болон талбайн зохион байгуулалтыг зохицуулагч.') },
-  { dept: 'technical-stage', role: b('Stage & Technical Lead', 'Тайз, техникийн ахлагч'), name: 'Anar Bayanjargal', photo: teamPhoto('anar.jpg'), bio: b('Leading technical production — stage systems, audiovisual setup, and live-event technical direction from rehearsal through showtime.', 'Тайзны систем, дуу дүрсний тохиргоо болон амьд үзүүлбэрийн техникийн удирдлагыг бэлтгэлээс эхлэн тайзны үйл ажиллагаа хүртэл хариуцагч.') },
+  { dept: 'technical-stage', role: b('Stage & Technical Lead', 'Тайз, техникийн ахлагч'), name: 'Anar Bayanjargal', photo: teamPhoto('anar.jpg'), bio: b('Leading technical production — stage systems, audiovisual setup, and live-event technical direction from rehearsal through showtime. Also designed and built this website, including online seat booking.', 'Тайзны систем, дуу дүрсний тохиргоо болон амьд үзүүлбэрийн техникийн удирдлагыг бэлтгэлээс эхлэн тайзны үйл ажиллагаа хүртэл хариуцагч. Мөн энэхүү вэбсайт болон онлайн суудал захиалгыг бүтээсэн.') },
   { dept: 'technical-stage', role: b('Stage & Technical Team', 'Тайз, техникийн баг'), name: 'Gan-Erdene Boldbaatar', bio: b('Supporting stage setup, audiovisual systems, and live technical operations.', 'Тайзны бэлтгэл, дуу дүрсний систем болон техникийн үйл ажиллагааг дэмжигч.') },
   { dept: 'curation', role: b('Curation Team Lead', 'Куратор багийн ахлагч'), name: 'Ariunjargal Mergenbayar', photo: teamPhoto('ariunjargal.jpg'), bio: b('Team member to be revealed soon.', 'Багийн гишүүн удахгүй зарлагдана.') },
   { dept: 'curation', role: b('Curation Team', 'Куратор баг'), name: 'Nandin-Erdene Bayartsogt', photo: teamPhoto('nandin-erdene.jpg'), bio: b('Helping select, shape, and prepare the talks and ideas shared on stage.', 'Тайзнаа хуваалцах илтгэл, санааг сонгох, бэлтгэхэд оролцогч.') },
