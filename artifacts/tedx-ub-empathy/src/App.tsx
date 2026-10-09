@@ -1,4 +1,4 @@
-import { type CSSProperties, type FormEvent, type MouseEvent, createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, type FormEvent, type MouseEvent, createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ArrowLeft, ArrowRight, Check, Mail, MapPin, Send, X } from 'lucide-react';
 import { Link, Route, Router as WouterRouter, Switch, useLocation } from 'wouter';
@@ -274,6 +274,29 @@ const speakers: SpeakerInfo[] = [
   { category: 'guest', type: speakerCategoryLabel.guest, desc: announcedSoon },
 ];
 
+// Shows text on a single line, shrinking the font just enough to fit the box
+// (used for speaker names so a long name doesn't wrap onto two lines).
+function FitText({ text, className }: { text: string; className: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => {
+      el.style.fontSize = '';
+      let size = parseFloat(getComputedStyle(el).fontSize);
+      while (el.scrollWidth > el.clientWidth && size > 11) {
+        size -= 0.5;
+        el.style.fontSize = `${size}px`;
+      }
+    };
+    fit();
+    void document.fonts?.ready.then(fit);
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, [text]);
+  return <div ref={ref} className={className} title={text}>{text}</div>;
+}
+
 const formatMnt = (amount: number) => `${amount.toLocaleString('en-US')}₮`;
 const ORGANIZER_EMAIL = 'Sergelenmunkhtushig@gmail.com';
 
@@ -356,6 +379,11 @@ function SeatCheckout({ seat, price, onTaken, onCancel }: { seat: number; price:
   </form>;
 }
 
+// Hall layout: 2x6 seats in each side wing, the rest in the centre (100 total).
+// Seats are numbered left wing 1-12, centre 13-88, right wing 89-100.
+const WING_SEATS = 12;
+const CENTER_SEATS = 100 - 2 * WING_SEATS;
+
 function SeatSelector() {
   const { tx } = useLang();
   const [size, setSize] = useState(23);
@@ -374,9 +402,9 @@ function SeatSelector() {
     <div className="stage"><div className="stage-bar" /><span>{tx(b('Main podium / stage', 'Гол тайз'))}</span></div>
     <div className="theater">
       <div className="theater-layout" style={style}>
-        <div className="wing left"><div className="wing-title">{tx(b('Left wing (30)', 'Зүүн жигүүр (30)'))}</div><div className="seat-grid wing-grid">{Array.from({ length: 30 }, (_, i) => seat(i + 1))}</div></div>
-        <div className="wing"><div className="wing-title">{tx(b('Center main (40)', 'Төв хэсэг (40)'))}</div><div className="seat-grid center-grid">{Array.from({ length: 40 }, (_, i) => seat(i + 31))}</div></div>
-        <div className="wing right"><div className="wing-title">{tx(b('Right wing (30)', 'Баруун жигүүр (30)'))}</div><div className="seat-grid wing-grid">{Array.from({ length: 30 }, (_, i) => seat(i + 71))}</div></div>
+        <div className="wing left"><div className="wing-title">{tx(b(`Left wing (${WING_SEATS})`, `Зүүн жигүүр (${WING_SEATS})`))}</div><div className="seat-grid wing-grid">{Array.from({ length: WING_SEATS }, (_, i) => seat(i + 1))}</div></div>
+        <div className="wing"><div className="wing-title">{tx(b(`Center main (${CENTER_SEATS})`, `Төв хэсэг (${CENTER_SEATS})`))}</div><div className="seat-grid center-grid">{Array.from({ length: CENTER_SEATS }, (_, i) => seat(i + WING_SEATS + 1))}</div></div>
+        <div className="wing right"><div className="wing-title">{tx(b(`Right wing (${WING_SEATS})`, `Баруун жигүүр (${WING_SEATS})`))}</div><div className="seat-grid wing-grid">{Array.from({ length: WING_SEATS }, (_, i) => seat(i + WING_SEATS + CENTER_SEATS + 1))}</div></div>
       </div>
     </div>
     <div className="seat-legend"><span className="legend"><i />{tx(b('Available', 'Боломжтой'))}</span><span className="legend"><i className="red" />{tx(b('Selected', 'Сонгосон'))}</span><span className="legend"><i className="taken" />{tx(b('Taken', 'Захиалагдсан'))}</span></div>
@@ -512,7 +540,7 @@ function Home() {
              <SeatSelector />
            </div>
          </section>
-          <section className="section" id="speakers"><div className="wrap reveal"><div className="eyebrow">{tx(b('02 / On Stage', '02 / Тайзнаа'))}</div><h2 className="section-title">{tx(b('12 Live Speakers', '12 Илтгэгч'))}</h2><div className="speakers-head"><div className="pills"><span className="pill"><b>4</b>{tx(b('Internal Students', 'Дотоод сурагчид'))}</span><span className="pill"><b>4</b>{tx(b('External Students', 'Гадаад сурагчид'))}</span><span className="pill"><b>4</b>{tx(b('Guest Speakers', 'Зочин илтгэгчид'))}</span></div><div className="scroll-buttons"><button className="icon-button" onClick={() => scrollSpeakers(-260)} aria-label="Scroll speakers left" data-testid="button-speakers-left"><ArrowLeft size={16} /></button><button className="icon-button" onClick={() => scrollSpeakers(260)} aria-label="Scroll speakers right" data-testid="button-speakers-right"><ArrowRight size={16} /></button></div></div><div className="speaker-scroll" ref={speakerRef}>{speakers.map((info, index) => { const type = tx(info.type); const desc = tx(info.desc); const displayName = info.name ?? tx(b(`Speaker #${String(index + 1).padStart(2, '0')}`, `Илтгэгч #${String(index + 1).padStart(2, '0')}`)); return <button className="speaker-card" key={`${type}-${index}`} onClick={() => setSpeaker({ index: index + 1, type, name: info.name, photo: info.photo, desc })} data-testid={`button-speaker-${index + 1}`}><div className={`speaker-avatar ${info.photo ? 'has-photo' : ''}`}>{info.photo ? <img src={info.photo} alt={info.name ?? ''} /> : '?'}<div className="speaker-avatar-overlay"><p className="speaker-avatar-desc">{desc}</p><span className="speaker-avatar-cta">{tx(b('View full profile', 'Дэлгэрэнгүй харах'))}</span></div></div><div className="speaker-type">{type}</div><div className="speaker-name">{displayName}</div><p className="speaker-desc">{desc}</p></button>; })}</div></div></section>
+          <section className="section" id="speakers"><div className="wrap reveal"><div className="eyebrow">{tx(b('02 / On Stage', '02 / Тайзнаа'))}</div><h2 className="section-title">{tx(b('12 Live Speakers', '12 Илтгэгч'))}</h2><div className="speakers-head"><div className="pills"><span className="pill"><b>4</b>{tx(b('Internal Students', 'Дотоод сурагчид'))}</span><span className="pill"><b>4</b>{tx(b('External Students', 'Гадаад сурагчид'))}</span><span className="pill"><b>4</b>{tx(b('Guest Speakers', 'Зочин илтгэгчид'))}</span></div><div className="scroll-buttons"><button className="icon-button" onClick={() => scrollSpeakers(-260)} aria-label="Scroll speakers left" data-testid="button-speakers-left"><ArrowLeft size={16} /></button><button className="icon-button" onClick={() => scrollSpeakers(260)} aria-label="Scroll speakers right" data-testid="button-speakers-right"><ArrowRight size={16} /></button></div></div><div className="speaker-scroll" ref={speakerRef}>{speakers.map((info, index) => { const type = tx(info.type); const desc = tx(info.desc); const displayName = info.name ?? tx(b(`Speaker #${String(index + 1).padStart(2, '0')}`, `Илтгэгч #${String(index + 1).padStart(2, '0')}`)); return <button className="speaker-card" key={`${type}-${index}`} onClick={() => setSpeaker({ index: index + 1, type, name: info.name, photo: info.photo, desc })} data-testid={`button-speaker-${index + 1}`}><div className={`speaker-avatar ${info.photo ? 'has-photo' : ''}`}>{info.photo ? <img src={info.photo} alt={info.name ?? ''} /> : '?'}<div className="speaker-avatar-overlay"><p className="speaker-avatar-desc">{desc}</p><span className="speaker-avatar-cta">{tx(b('View full profile', 'Дэлгэрэнгүй харах'))}</span></div></div><div className="speaker-type">{type}</div><FitText className="speaker-name" text={displayName} /><p className="speaker-desc">{desc}</p></button>; })}</div></div></section>
          <section className="section schedule" id="schedule"><div className="wrap reveal"><div className="eyebrow">{tx(b('03 / Timetable', '03 / Цагийн хуваарь'))}</div><h2 className="section-title">{tx(b('Event Schedule (Coming Soon)', 'Арга хэмжээний хөтөлбөр (Тун удахгүй)'))}</h2><p className="muted">{tx(b('Click on a session below to view details.', 'Доорх хэсэгт дарж дэлгэрэнгүй хуваарийг харна уу.'))}</p><div className="schedule-list">{sessions.map(([title, time, rows], index) => <div className={`session ${openSession === index ? 'open' : ''}`} key={title.en}><button className="session-header" onClick={() => setOpenSession(openSession === index ? null : index)} aria-expanded={openSession === index} data-testid={`button-schedule-${index}`}><div><h3>{tx(title)}</h3><span className="session-badge">{time}</span></div><span className="toggle">{openSession === index ? '−' : '+'}</span></button><div className="session-items">{rows.map(([rowTime, event]) => <div className="schedule-row" key={rowTime}><div className="time">{rowTime}</div><div className="event">{tx(event)}</div></div>)}</div></div>)}</div></div></section>
           <section className="section" id="contact"><div className="wrap reveal"><div className="eyebrow">{tx(b('04 / Get In Touch', '04 / Холбоо барих'))}</div><h2 className="section-title">{tx(b('Reach Out to Our Team', 'Бидэнтэй холбогдох'))}</h2><div className="contact-grid"><div className="info-card"><h3>{tx(b('Organizers', 'Зохион байгуулагчид'))}</h3><div className="organizer"><div><strong>Munkhtushig Sergelen</strong><p>{tx(b('Organizer / strategic operations', 'Зохион байгуулагч / стратеги'))}</p></div><span>01</span></div><div className="organizer"><div><strong>Munkh-Erdene Ganbold</strong><p>{tx(b('Co-organizer / venue execution', 'Хамтран зохион байгуулагч / талбай'))}</p></div><span>02</span></div><div className="socials"><a href="mailto:hello@tedxubempathy.school"><Mail size={14} />Email</a></div></div><div className="form-card"><h3>{tx(b('Send a Message', 'Зурвас илгээх'))}</h3><form onSubmit={(event) => {
               event.preventDefault();
