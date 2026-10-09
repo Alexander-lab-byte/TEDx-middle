@@ -1,4 +1,4 @@
-import { type CSSProperties, type MouseEvent, createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, type FormEvent, type MouseEvent, createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ArrowLeft, ArrowRight, Check, Mail, MapPin, Send, X } from 'lucide-react';
 import { Link, Route, Router as WouterRouter, Switch, useLocation } from 'wouter';
@@ -265,16 +265,100 @@ const speakers: SpeakerInfo[] = [
   { category: 'guest', type: speakerCategoryLabel.guest, desc: announcedSoon },
 ];
 
+const formatMnt = (amount: number) => `${amount.toLocaleString('en-US')}₮`;
+const ORGANIZER_EMAIL = 'Sergelenmunkhtushig@gmail.com';
+
+interface SeatState { taken: Set<number>; price: number | null; online: boolean }
+
+function useSeatAvailability() {
+  const [state, setState] = useState<SeatState>({ taken: new Set(), price: null, online: false });
+  const refresh = async () => {
+    try {
+      const res = await fetch('/api/seats', { cache: 'no-store' });
+      if (!res.ok) throw new Error(String(res.status));
+      const data = (await res.json()) as { taken: number[]; price: number };
+      setState({ taken: new Set(data.taken), price: data.price, online: true });
+    } catch {
+      setState((prev) => ({ ...prev, online: false }));
+    }
+  };
+  useEffect(() => {
+    void refresh();
+    const timer = window.setInterval(() => void refresh(), 30000);
+    return () => window.clearInterval(timer);
+  }, []);
+  return { ...state, refresh };
+}
+
+const checkoutErrors: Record<string, Bilingual> = {
+  seat_taken: b('Sorry — someone just took that seat. Please pick another one.', 'Уучлаарай, энэ суудлыг саяхан өөр хүн авлаа. Өөр суудал сонгоно уу.'),
+  invalid_fields: b('Please check the highlighted fields.', 'Тэмдэглэгдсэн талбаруудаа шалгана уу.'),
+  default: b('Online payment is unavailable right now. Please try again in a moment.', 'Онлайн төлбөр түр ажиллахгүй байна. Хэсэг хугацааны дараа дахин оролдоно уу.'),
+};
+
+function SeatCheckout({ seat, price, onTaken, onCancel }: { seat: number; price: number; onTaken: () => void; onCancel: () => void }) {
+  const { tx, lang } = useLang();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<Bilingual | null>(null);
+  const [badFields, setBadFields] = useState<string[]>([]);
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    setBusy(true); setError(null); setBadFields([]);
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seat, lang, name: data.get('name'), phone: data.get('phone'), email: data.get('email'), school: data.get('school') }),
+      });
+      const body = (await res.json().catch(() => ({}))) as { followUpLink?: string; error?: string; fields?: string[] };
+      if (res.ok && body.followUpLink) { window.location.href = body.followUpLink; return; }
+      if (body.error === 'seat_taken') onTaken();
+      setBadFields(body.fields ?? []);
+      setError(checkoutErrors[body.error ?? ''] ?? checkoutErrors.default);
+    } catch {
+      setError(checkoutErrors.default);
+    }
+    setBusy(false);
+  };
+  const field = (name: string, label: Bilingual, type: string, placeholder: Bilingual | string, autoComplete: string) => (
+    <div className={`form-field ${badFields.includes(name) ? 'invalid' : ''}`}>
+      <label htmlFor={`checkout-${name}`}>{tx(label)}</label>
+      <input id={`checkout-${name}`} name={name} type={type} required autoComplete={autoComplete} placeholder={typeof placeholder === 'string' ? placeholder : tx(placeholder)} data-testid={`input-checkout-${name}`} />
+    </div>
+  );
+  return <form className="seat-checkout" onSubmit={submit} data-testid="form-seat-checkout">
+    <div className="seat-checkout-head">
+      <div><span className="eyebrow">{tx(b('Your ticket', 'Таны тасалбар'))}</span><h4>{tx(b(`Seat #${seat}`, `№${seat} суудал`))}</h4></div>
+      <strong className="seat-checkout-price">{formatMnt(price)}</strong>
+    </div>
+    <div className="seat-checkout-grid">
+      {field('name', b('Full name', 'Овог нэр'), 'text', b('e.g. Anujin Batbayar', 'Жнь: Батбаярын Анужин'), 'name')}
+      {field('phone', b('Phone', 'Утас'), 'tel', '9911 2233', 'tel')}
+      {field('email', b('Email', 'И-мэйл'), 'email', 'name@example.com', 'email')}
+      {field('school', b('School / class', 'Сургууль / анги'), 'text', b('e.g. Empathy School, 11a', 'Жнь: Эмпати сургууль, 11а'), 'organization')}
+    </div>
+    {error && <div className="seat-checkout-error" role="alert" data-testid="status-checkout-error">{tx(error)}</div>}
+    <div className="seat-checkout-actions">
+      <button type="button" className="button ghost small" onClick={onCancel}>{tx(b('Cancel', 'Болих'))}</button>
+      <button type="submit" className="button" disabled={busy} data-testid="button-pay-qpay">{busy ? tx(b('Opening payment…', 'Төлбөр нээж байна…')) : tx(b(`Pay ${formatMnt(price)} with QPay`, `QPay-ээр ${formatMnt(price)} төлөх`))}</button>
+    </div>
+    <p className="seat-checkout-note">{tx(b('Your seat is held for 15 minutes while you pay. You will be taken to the secure Bonum payment page to pay with QPay.', 'Төлбөр төлөх хугацаанд суудал тань 15 минут хадгалагдана. Та Bonum-ийн аюулгүй төлбөрийн хуудас руу шилжиж QPay-ээр төлнө.'))}</p>
+  </form>;
+}
+
 function SeatSelector() {
   const { tx } = useLang();
   const [size, setSize] = useState(23);
   const [selected, setSelected] = useState<number | null>(null);
-  const taken = useMemo(() => new Set<number>([]), []);
-  const seat = (number: number) => <button key={number} className={`seat ${taken.has(number) ? 'taken' : ''} ${selected === number ? 'selected' : ''}`} disabled={taken.has(number)} onClick={() => setSelected(selected === number ? null : number)} aria-label={`Seat ${number}`} data-testid={`button-seat-${number}`}>{number}</button>;
+  const [lostSeat, setLostSeat] = useState<number | null>(null);
+  const { taken, price, online, refresh } = useSeatAvailability();
+  useEffect(() => { if (selected !== null && taken.has(selected)) { setLostSeat(selected); setSelected(null); } }, [taken, selected]);
+  const seat = (number: number) => <button key={number} className={`seat ${taken.has(number) ? 'taken' : ''} ${selected === number ? 'selected' : ''}`} disabled={taken.has(number)} onClick={() => { setLostSeat(null); setSelected(selected === number ? null : number); }} aria-label={`Seat ${number}`} data-testid={`button-seat-${number}`}>{number}</button>;
   const style = { '--seat-size': `${size}px` } as CSSProperties;
   return <div className="seat-panel reveal" id="seats">
     <div className="seat-header">
-      <div><h3>{tx(b('Hall Seat Availability', 'Танхимын суудлын мэдээлэл'))}</h3><p>{tx(b('Tap any available seat to reserve your spot.', 'Сул суудал дээр дарж суудлаа захиална уу.'))}</p></div>
+      <div><h3>{tx(b('Hall Seat Availability', 'Танхимын суудлын мэдээлэл'))}</h3><p>{price ? tx(b(`Pick a seat and pay ${formatMnt(price)} with QPay to book it.`, `Суудлаа сонгоод QPay-ээр ${formatMnt(price)} төлж захиална уу.`)) : tx(b('Tap any available seat to reserve your spot.', 'Сул суудал дээр дарж суудлаа захиална уу.'))}</p></div>
       <div className="seat-count"><strong>{100 - taken.size}</strong><span>{tx(b('Seats remaining / 100 capacity', 'Үлдсэн суудал / нийт 100'))}</span></div>
     </div>
     <label className="seat-controls">{tx(b('View zoom', 'Томруулах'))}<input aria-label="Seat view zoom" type="range" min="15" max="32" value={size} onChange={(event) => setSize(Number(event.target.value))} data-testid="input-seat-zoom" /></label>
@@ -287,8 +371,71 @@ function SeatSelector() {
       </div>
     </div>
     <div className="seat-legend"><span className="legend"><i />{tx(b('Available', 'Боломжтой'))}</span><span className="legend"><i className="red" />{tx(b('Selected', 'Сонгосон'))}</span><span className="legend"><i className="taken" />{tx(b('Taken', 'Захиалагдсан'))}</span></div>
-    {selected && <div className="seat-selected" data-testid="status-selected-seat">{tx(b(`Seat #${selected} selected — message us to complete registration.`, `№${selected} суудал сонгогдлоо — бүртгэлээ дуусгахын тулд бидэнд зурвас илгээнэ үү.`))}</div>}
+    {lostSeat && !selected && <div className="seat-checkout-error seat-lost" role="alert">{tx(b(`Sorry — seat #${lostSeat} was just taken by someone else. Please pick another seat.`, `Уучлаарай, №${lostSeat} суудлыг саяхан өөр хүн авлаа. Өөр суудал сонгоно уу.`))}</div>}
+    {selected && online && price
+      ? <SeatCheckout key={selected} seat={selected} price={price} onTaken={() => void refresh()} onCancel={() => setSelected(null)} />
+      : selected && <div className="seat-selected" data-testid="status-selected-seat">{tx(b(`Seat #${selected} selected — online booking is unavailable right now, please message us to reserve it.`, `№${selected} суудал сонгогдлоо — онлайн захиалга түр ажиллахгүй байна, бидэнд зурвас илгээж захиална уу.`))}</div>}
   </div>;
+}
+
+type OrderStatus = 'pending' | 'paid' | 'failed' | 'expired' | 'conflict';
+
+function PaymentStatus() {
+  const { tx } = useLang();
+  const txId = useMemo(() => new URLSearchParams(window.location.search).get('tx') ?? '', []);
+  const [order, setOrder] = useState<{ seat: number; status: OrderStatus; name: string; amount: number } | null>(null);
+  const [missing, setMissing] = useState(false);
+  useEffect(() => {
+    let stopped = false;
+    let attempts = 0;
+    const check = async () => {
+      attempts += 1;
+      try {
+        const res = await fetch(`/api/order?tx=${encodeURIComponent(txId)}`, { cache: 'no-store' });
+        if (res.status === 404) { setMissing(true); return; }
+        if (res.ok) {
+          const data = (await res.json()) as { seat: number; status: OrderStatus; name: string; amount: number };
+          setOrder(data);
+          if (data.status !== 'pending') return;
+        }
+      } catch { /* retry below */ }
+      // Bonum confirms payments by webhook, which can take a few seconds.
+      if (!stopped && attempts < 60) window.setTimeout(() => void check(), 3000);
+    };
+    void check();
+    return () => { stopped = true; };
+  }, [txId]);
+
+  let title: Bilingual; let body: Bilingual; let tone = '';
+  if (missing) {
+    title = b('Order not found', 'Захиалга олдсонгүй'); tone = 'warn';
+    body = b('We could not find this payment. If money left your account, please email us.', 'Энэ төлбөр олдсонгүй. Хэрэв таны данснаас мөнгө гарсан бол бидэнд и-мэйл бичнэ үү.');
+  } else if (!order || order.status === 'pending') {
+    title = b('Confirming your payment…', 'Төлбөрийг шалгаж байна…');
+    body = b('This usually takes a few seconds. Keep this page open.', 'Ихэвчлэн хэдхэн секунд болно. Энэ хуудсыг хаалгүй хүлээнэ үү.');
+  } else if (order.status === 'paid') {
+    title = b(`Seat #${order.seat} is yours!`, `№${order.seat} суудал таных боллоо!`); tone = 'ok';
+    body = b(`Thank you, ${order.name}. Your payment of ${formatMnt(order.amount)} was received and your seat is booked for October 24.`, `Баярлалаа, ${order.name}. Таны ${formatMnt(order.amount)} төлбөр орж, 10-р сарын 24-ний суудал тань баталгаажлаа.`);
+  } else if (order.status === 'conflict') {
+    title = b('Payment received — we will contact you', 'Төлбөр орсон — бид тантай холбогдоно'); tone = 'warn';
+    body = b(`Your payment arrived after your 15-minute hold ended, and seat #${order.seat} had already been sold. We will contact you to give you another seat or a refund.`, `Таны төлбөр 15 минутын хугацаа дууссаны дараа орсон бөгөөд №${order.seat} суудал аль хэдийн зарагдсан байна. Бид тантай холбогдож өөр суудал эсвэл буцаан олголт хийнэ.`);
+  } else {
+    title = b('Payment not completed', 'Төлбөр хийгдээгүй'); tone = 'warn';
+    body = b(`The payment was not completed, so seat #${order.seat} was released. You can pick a seat and try again.`, `Төлбөр хийгдээгүй тул №${order.seat} суудлыг чөлөөллөө. Дахин суудал сонгож оролдоно уу.`);
+  }
+
+  return <><Nav /><main className="page-main"><div className="wrap">
+    <div className={`payment-status ${tone}`} data-testid="status-payment">
+      <div className="eyebrow">{tx(b('Ticket payment', 'Тасалбарын төлбөр'))}</div>
+      <h1>{tx(title)}</h1>
+      <p>{tx(body)}</p>
+      {txId && <p className="payment-ref">{tx(b('Reference', 'Лавлах дугаар'))}: <code>{txId.slice(0, 8).toUpperCase()}</code></p>}
+      <div className="hero-row">
+        <a href="/#seats" className="button">{tx(b(order?.status === 'paid' ? 'Back to the event' : 'Choose a seat', order?.status === 'paid' ? 'Нүүр хуудас руу буцах' : 'Суудал сонгох'))}</a>
+        {tone === 'warn' && <a className="button ghost" href={`mailto:${ORGANIZER_EMAIL}?subject=${encodeURIComponent(`TEDx ticket payment ${txId.slice(0, 8).toUpperCase()}`)}`}><Mail size={14} />{tx(b('Email organizers', 'Зохион байгуулагчид бичих'))}</a>}
+      </div>
+    </div>
+  </div></main><Footer /></>;
 }
 
 function SpeakerModal({ speaker, close }: { speaker: { index: number; type: string; name?: string; photo?: string; desc: string } | null; close: () => void }) {
@@ -367,7 +514,7 @@ function Home() {
               const message = String(data.get('message') ?? '');
               const subject = encodeURIComponent(`TEDx Ulaanbaatar website message from ${name}`);
               const body = encodeURIComponent(`Name: ${name}\nEmail: ${emailAddress}\n\nMessage:\n${message}`);
-              window.location.href = `mailto:Sergelenmunkhtushig@gmail.com?subject=${subject}&body=${body}`;
+              window.location.href = `mailto:${ORGANIZER_EMAIL}?subject=${subject}&body=${body}`;
               setMessageSent(true);
               form.reset();
               window.setTimeout(() => setMessageSent(false), 4500);
@@ -576,7 +723,7 @@ function Apply() {
 
 function Router() {
   const [location] = useLocation();
-  return <ErrorBoundary resetKey={location}><Switch><Route path="/" component={Home} /><Route path="/library" component={Library} /><Route path="/team" component={Team} /><Route path="/apply" component={Apply} /><Route component={NotFound} /></Switch></ErrorBoundary>;
+  return <ErrorBoundary resetKey={location}><Switch><Route path="/" component={Home} /><Route path="/library" component={Library} /><Route path="/team" component={Team} /><Route path="/apply" component={Apply} /><Route path="/payment" component={PaymentStatus} /><Route component={NotFound} /></Switch></ErrorBoundary>;
 }
 
 function App() {

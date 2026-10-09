@@ -460,3 +460,32 @@ a { color: inherit; text-decoration: none; }
   .deadline-card { flex-direction: column; align-items: flex-start; }
   .deadline-countdown { margin-left: 0; }
 }
+
+/* ---------- Seat checkout (QPay via Bonum) ---------- */
+.seat-checkout { max-width: 620px; margin: 22px auto 4px; padding: 20px; border: 1px solid rgba(235,0,40,.45); border-radius: 6px; background: linear-gradient(180deg, rgba(235,0,40,.08), rgba(235,0,40,.02)); animation: modal-fade-in .25s ease; }
+.seat-checkout-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px solid var(--line-soft); }
+.seat-checkout-head h4 { margin: 4px 0 0; font-size: 22px; }
+.seat-checkout-price { color: var(--ted-hi); font: 700 22px var(--app-font-mono); white-space: nowrap; }
+.seat-checkout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+.seat-checkout .form-field.invalid input { border-color: var(--ted-hi); }
+.seat-checkout-error { margin: 2px 0 14px; padding: 10px 12px; border: 1px solid var(--ted); border-radius: 4px; color: var(--ted-hi); background: rgba(235,0,40,.1); font-size: 12px; }
+.seat-checkout-actions { display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-wrap: wrap; }
+.seat-checkout-actions .button[disabled] { opacity: .6; cursor: progress; transform: none; }
+.seat-checkout-note { margin: 14px 0 0; color: var(--dim); font-size: 11px; line-height: 1.5; }
+@media (max-width: 560px) {
+  .seat-checkout { padding: 16px; }
+  .seat-checkout-grid { grid-template-columns: 1fr; }
+  .seat-checkout-actions .button { flex: 1 1 auto; }
+}
+
+/* ---------- Payment status page ---------- */
+.payment-status { max-width: 620px; margin: 64px auto 96px; padding: 32px 28px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); text-align: center; }
+.payment-status h1 { margin: 10px 0 12px; font-size: clamp(26px, 5vw, 38px); line-height: 1.1; }
+.payment-status p { margin: 0 auto 10px; max-width: 480px; color: var(--muted); line-height: 1.6; }
+.payment-status.ok { border-color: rgba(189,235,220,.45); }
+.payment-status.ok h1 { color: var(--mint); }
+.payment-status.warn { border-color: rgba(255,211,79,.4); }
+.payment-status .payment-ref { font: 700 11px var(--app-font-mono); letter-spacing: .08em; color: var(--dim); }
+.payment-status .payment-ref code { color: var(--white); }
+.payment-status .hero-row { justify-content: center; margin-top: 22px; }
+.seat-lost { max-width: 620px; margin: 18px auto 0; text-align: center; }
