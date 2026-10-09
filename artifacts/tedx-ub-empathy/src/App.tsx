@@ -217,7 +217,16 @@ const speakers: SpeakerInfo[] = [
       'Бараг 10 жилийн турш төгөлдөр хуур тоглодог бөгөөд одон орон судлал, астрофизикт сонирхолтой.',
     ),
   },
-  { category: 'internal', type: speakerCategoryLabel.internal, desc: announcedSoon },
+  {
+    category: 'internal',
+    type: speakerCategoryLabel.internal,
+    name: 'Anarsaikhan',
+    photo: speakerPhoto('anarsaikhan.jpg'),
+    desc: b(
+      'A Mongolian high school student passionate about space science, aerospace engineering, science, and technology — learning by building with his own hands through rocketry, electronics, and 3D-printing projects, with the goal of contributing to the growth of Mongolia\'s space technology sector.',
+      'Монголын ахлах ангийн сурагч бөгөөд сансар судлал, aerospace инженерчлэл, шинжлэх ухаан, технологид ихээхэн сонирхолтой. Пуужин бүтээх, электроник болон 3D хэвлэлийн төсөл дээр ажиллаж шинэ зүйл туршиж өөрийн гараар бүтээж сурах хүсэл эрмэлзэлтэй. Цаашдаа инженерийн мэдлэг ур чадвараа хөгжүүлж Монголын сансар технологийн салбарын хөгжилд хувь нэмэр оруулна.',
+    ),
+  },
   { category: 'internal', type: speakerCategoryLabel.internal, desc: announcedSoon },
   {
     category: 'external-student',
@@ -547,14 +556,13 @@ const teamMembers: TeamMemberInfo[] = [
   { dept: 'leadership', role: b('Licensee & Lead Organizer', 'Франчайз эзэмшигч ба ахлах зохион байгуулагч'), name: 'Munkhtushig Sergelen', photo: teamPhoto('munkhtushig.jpg'), bio: b('Directing strategic operations, licensing compliance, and overarching vision for the event.', 'Арга хэмжээний стратеги, франчайз зөвшөөрөл болон ерөнхий чиглэлийг удирдан чиглүүлэгч.') },
   { dept: 'leadership', role: b('Co-Organizer', 'Хамтран зохион байгуулагч'), name: 'G. Munkh-Erdene', photo: teamPhoto('munkherdene.jpg'), bio: b('Coordinating department workflows, operational planning, and venue execution.', 'Албадын үйл ажиллагаа, операци төлөвлөлт болон талбайн зохион байгуулалтыг зохицуулагч.') },
   { dept: 'technical-stage', role: b('Stage & Technical Lead', 'Тайз, техникийн ахлагч'), name: 'Anar Bayanjargal', photo: teamPhoto('anar.jpg'), bio: b('Leading technical production — stage systems, audiovisual setup, and live-event technical direction from rehearsal through showtime.', 'Тайзны систем, дуу дүрсний тохиргоо болон амьд үзүүлбэрийн техникийн удирдлагыг бэлтгэлээс эхлэн тайзны үйл ажиллагаа хүртэл хариуцагч.') },
-  { dept: 'technical-stage', role: b('Stage & Technical Team', 'Тайз, техникийн баг'), name: 'Emuujin Mungunshagai', bio: b('Supporting stage setup, audiovisual systems, and live technical operations.', 'Тайзны бэлтгэл, дуу дүрсний систем болон техникийн үйл ажиллагааг дэмжигч.') },
   { dept: 'technical-stage', role: b('Stage & Technical Team', 'Тайз, техникийн баг'), name: 'Gan-Erdene Boldbaatar', bio: b('Supporting stage setup, audiovisual systems, and live technical operations.', 'Тайзны бэлтгэл, дуу дүрсний систем болон техникийн үйл ажиллагааг дэмжигч.') },
   { dept: 'curation', role: b('Curation Team Lead', 'Куратор багийн ахлагч'), name: 'Ariunjargal Mergenbayar', photo: teamPhoto('ariunjargal.jpg'), bio: b('Team member to be revealed soon.', 'Багийн гишүүн удахгүй зарлагдана.') },
-  { dept: 'curation', role: b('Curation Team', 'Куратор баг'), name: 'Nandin-Erdene Bayartsogt', bio: b('Helping select, shape, and prepare the talks and ideas shared on stage.', 'Тайзнаа хуваалцах илтгэл, санааг сонгох, бэлтгэхэд оролцогч.') },
+  { dept: 'curation', role: b('Curation Team', 'Куратор баг'), name: 'Nandin-Erdene Bayartsogt', photo: teamPhoto('nandin-erdene.jpg'), bio: b('Helping select, shape, and prepare the talks and ideas shared on stage.', 'Тайзнаа хуваалцах илтгэл, санааг сонгох, бэлтгэхэд оролцогч.') },
   { dept: 'marketing', role: b('Marketing Lead', 'Маркетингийн ахлагч'), name: 'Munkhjin Chinbatbold', photo: teamPhoto('munkhjin.jpg'), bio: b('Directing visual branding, digital media assets, stage production aesthetics, and creative direction.', 'Арга хэмжээний визуал брэнд, дижитал контент, тайзны дизайн болон бүтээлч чиглэлийг хариуцагч.') },
   { dept: 'marketing', role: b('Marketing Team', 'Маркетингийн баг'), name: 'Khuslen Baigalimurun', bio: b('Supporting promotion, social media, and outreach for the event.', 'Арга хэмжээний сурталчилгаа, сошиал медиа болон түгээлтийг дэмжигч.') },
   { dept: 'logistics', role: b('Logistics Lead', 'Логистикийн ахлагч'), name: 'Munkhtushig Sergelen', photo: teamPhoto('munkhtushig.jpg'), bio: b('Also leading logistics planning and on-the-ground operations for the event.', 'Арга хэмжээний логистик төлөвлөлт болон газар дээрх үйл ажиллагааг давхар хариуцагч.') },
-  { dept: 'logistics', role: b('Operations', 'Үйл ажиллагаа'), name: '?', bio: b('Team member to be revealed soon.', 'Багийн гишүүн удахгүй зарлагдана.') },
+  { dept: 'logistics', role: b('Logistics Team', 'Логистикийн баг'), name: 'Emuujin Mungunshagai', photo: teamPhoto('emuujin.jpg'), bio: b('Supporting logistics planning and on-the-day operations for the event.', 'Арга хэмжээний логистик төлөвлөлт болон тухайн өдрийн үйл ажиллагааг дэмжигч.') },
   { dept: 'finance', role: b('Finance Manager', 'Санхүүгийн менежер'), name: 'Y. Namuunzaya', photo: teamPhoto('namuunzaya.jpg'), bio: b('Team member to be revealed soon.', 'Багийн гишүүн удахгүй зарлагдана.') },
 ];
 
