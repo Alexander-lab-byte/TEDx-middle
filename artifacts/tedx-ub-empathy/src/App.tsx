@@ -7,6 +7,7 @@ import { LiveMap } from '@/components/live-map';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
+import { TERMS_UPDATED, termsSections } from '@/terms';
 
 type Lang = 'en' | 'mn';
 type Bilingual = { en: string; mn: string };
@@ -147,7 +148,7 @@ function Footer({ showMap = false }: { showMap?: boolean }) {
     <footer className="footer">
       <div className="wrap footer-inner">
         <div><Brand /><p style={{ marginTop: 14 }}>{tx(b('This independent TEDx event is operated under license from TED.', 'Энэхүү бие даасан TEDx арга хэмжээ нь TED-ийн тусгай зөвшөөрлийн дагуу зохион байгуулагдаж байна.'))}</p></div>
-        <p><strong>TEDxUlaanbaatar Empathy School Youth © 2026</strong><br />{tx(b('Ideas worth spreading, from Ulaanbaatar.', 'Түгээх үнэ цэнэтэй санаанууд, Улаанбаатараас.'))}<br /><span className="footer-credit">{tx(b('Website by Anar Bayanjargal', 'Вэбсайтыг бүтээсэн: Анар Баянжаргал'))}</span></p>
+        <p><strong>TEDxUlaanbaatar Empathy School Youth © 2026</strong><br />{tx(b('Ideas worth spreading, from Ulaanbaatar.', 'Түгээх үнэ цэнэтэй санаанууд, Улаанбаатараас.'))}<br /><a className="footer-link" href="/terms">{tx(b('Ticket terms & privacy', 'Тасалбарын нөхцөл ба нууцлал'))}</a><br /><span className="footer-credit">{tx(b('Website by Anar Bayanjargal', 'Вэбсайтыг бүтээсэн: Анар Баянжаргал'))}</span></p>
       </div>
     </footer>
   </>;
@@ -341,7 +342,7 @@ function SeatCheckout({ seat, price, onTaken, onCancel }: { seat: number; price:
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ seat, lang, name: data.get('name'), phone: data.get('phone'), email: data.get('email'), school: data.get('school') }),
+        body: JSON.stringify({ seat, lang, agree: data.get('agree') === 'on', name: data.get('name'), phone: data.get('phone'), email: data.get('email'), school: data.get('school') }),
       });
       const body = (await res.json().catch(() => ({}))) as { followUpLink?: string; error?: string; fields?: string[] };
       if (res.ok && body.followUpLink) { window.location.href = body.followUpLink; return; }
@@ -370,6 +371,10 @@ function SeatCheckout({ seat, price, onTaken, onCancel }: { seat: number; price:
       {field('email', b('Email', 'И-мэйл'), 'email', 'name@example.com', 'email')}
       {field('school', b('School / class', 'Сургууль / анги'), 'text', b('e.g. Empathy School, 11a', 'Жнь: Эмпати сургууль, 11а'), 'organization')}
     </div>
+    <label className={`seat-checkout-agree ${badFields.includes('terms') ? 'invalid' : ''}`}>
+      <input type="checkbox" name="agree" required data-testid="checkbox-agree-terms" />
+      <span>{tx(b('I agree to the ', 'Би '))}<a href="/terms" target="_blank" rel="noopener noreferrer">{tx(b('ticket terms and privacy policy', 'тасалбарын нөхцөл, нууцлалын бодлогыг'))}</a>{tx(b(', and understand that tickets are non-refundable.', ' зөвшөөрч, тасалбарын төлбөр буцаагдахгүйг ойлгосон.'))}</span>
+    </label>
     {error && <div className="seat-checkout-error" role="alert" data-testid="status-checkout-error">{tx(error)}</div>}
     <div className="seat-checkout-actions">
       <button type="button" className="button ghost small" onClick={onCancel}>{tx(b('Cancel', 'Болих'))}</button>
@@ -416,6 +421,27 @@ function SeatSelector() {
 }
 
 type OrderStatus = 'pending' | 'paid' | 'failed' | 'expired' | 'conflict';
+
+function Terms() {
+  const { tx } = useLang();
+  useScrollReveal();
+  return <><Nav /><main className="page-main">
+    <section className="page-hero terms-hero"><div className="wrap reveal">
+      <div className="eyebrow">{tx(b('Tickets & privacy', 'Тасалбар ба нууцлал'))}</div>
+      <h1>{tx(b('Terms', 'Нөхцөл'))}</h1>
+      <p>{tx(b('Please read these before buying a ticket. In short: tickets are for one seat, payment is by QPay, and all sales are final.', 'Тасалбар авахаасаа өмнө уншина уу. Товчхондоо: тасалбар нэг суудалд хамаарна, төлбөрийг QPay-ээр хийнэ, худалдан авсан тасалбарын төлбөр буцаагдахгүй.'))}</p>
+      <p className="terms-updated">{tx(TERMS_UPDATED)}</p>
+    </div></section>
+    <section className="section terms-body"><div className="wrap">
+      <nav className="terms-toc" aria-label={tx(b('Sections', 'Хэсгүүд'))}>{termsSections.map((section) => <a key={section.id} href={`#${section.id}`}>{tx(section.title)}</a>)}</nav>
+      {termsSections.map((section) => <article className="terms-section" id={section.id} key={section.id}>
+        <h2>{tx(section.title)}</h2>
+        <ul>{section.points.map((point) => <li key={point.en}>{tx(point)}</li>)}</ul>
+      </article>)}
+      <div className="terms-contact"><h2>{tx(b('Questions or requests', 'Асуулт, хүсэлт'))}</h2><p>{tx(b('Email the organizers and include your payment reference if you have one.', 'Төлбөрийн лавлах дугаар байгаа бол хамт бичээд зохион байгуулагчид и-мэйл илгээнэ үү.'))}</p><a className="button" href={`mailto:${ORGANIZER_EMAIL}`}><Mail size={14} />{ORGANIZER_EMAIL}</a></div>
+    </div></section>
+  </main><Footer /></>;
+}
 
 function PaymentStatus() {
   const { tx } = useLang();
@@ -762,7 +788,7 @@ function Apply() {
 
 function Router() {
   const [location] = useLocation();
-  return <ErrorBoundary resetKey={location}><Switch><Route path="/" component={Home} /><Route path="/library" component={Library} /><Route path="/team" component={Team} /><Route path="/apply" component={Apply} /><Route path="/payment" component={PaymentStatus} /><Route component={NotFound} /></Switch></ErrorBoundary>;
+  return <ErrorBoundary resetKey={location}><Switch><Route path="/" component={Home} /><Route path="/library" component={Library} /><Route path="/team" component={Team} /><Route path="/apply" component={Apply} /><Route path="/payment" component={PaymentStatus} /><Route path="/terms" component={Terms} /><Route component={NotFound} /></Switch></ErrorBoundary>;
 }
 
 function App() {
