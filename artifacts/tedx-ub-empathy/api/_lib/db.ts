@@ -3,14 +3,21 @@
 // server code can read or write it.
 import { config } from './config.js';
 
+// Works with both Supabase key formats: the new `sb_secret_...` keys go only
+// in the `apikey` header, while legacy service_role JWTs also go in Authorization.
+function authHeaders(): Record<string, string> {
+  const key = config.supabaseServiceKey();
+  return {
+    apikey: key,
+    ...(key.startsWith('eyJ') ? { Authorization: `Bearer ${key}` } : {}),
+    'Content-Type': 'application/json',
+  };
+}
+
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const res = await fetch(`${config.supabaseUrl()}/rest/v1/rpc/${fn}`, {
     method: 'POST',
-    headers: {
-      apikey: config.supabaseServiceKey(),
-      Authorization: `Bearer ${config.supabaseServiceKey()}`,
-      'Content-Type': 'application/json',
-    },
+    headers: authHeaders(),
     body: JSON.stringify(args),
   });
   if (!res.ok) throw new Error(`Supabase rpc ${fn} failed: ${res.status} ${await res.text()}`);
@@ -20,12 +27,7 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
 async function rest(path: string, init: RequestInit = {}): Promise<Response> {
   const res = await fetch(`${config.supabaseUrl()}/rest/v1/${path}`, {
     ...init,
-    headers: {
-      apikey: config.supabaseServiceKey(),
-      Authorization: `Bearer ${config.supabaseServiceKey()}`,
-      'Content-Type': 'application/json',
-      ...(init.headers as Record<string, string> | undefined),
-    },
+    headers: { ...authHeaders(), ...(init.headers as Record<string, string> | undefined) },
   });
   if (!res.ok) throw new Error(`Supabase ${init.method || 'GET'} ${path} failed: ${res.status} ${await res.text()}`);
   return res;
@@ -103,4 +105,27 @@ export async function getOrder(transactionId: string): Promise<OrderSummary | nu
   );
   const rows = (await res.json()) as OrderSummary[];
   return rows[0] ?? null;
+}
+
+// Bonum access token, shared by every server instance so we don't request a
+// new one per request (Bonum answers 429 "Use previous token" if we do).
+export interface StoredToken {
+  access_token: string;
+  access_expires_at: string;
+  refresh_token: string;
+  refresh_expires_at: string;
+}
+
+export async function loadBonumToken(): Promise<StoredToken | null> {
+  const res = await rest('tedx_bonum_token?id=eq.1&select=access_token,access_expires_at,refresh_token,refresh_expires_at&limit=1');
+  const rows = (await res.json()) as StoredToken[];
+  return rows[0] ?? null;
+}
+
+export async function saveBonumToken(token: StoredToken): Promise<void> {
+  await rest('tedx_bonum_token?on_conflict=id', {
+    method: 'POST',
+    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ id: 1, ...token, updated_at: new Date().toISOString() }),
+  });
 }
