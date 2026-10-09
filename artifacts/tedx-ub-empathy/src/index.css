@@ -489,3 +489,4 @@ a { color: inherit; text-decoration: none; }
 .payment-status .payment-ref code { color: var(--white); }
 .payment-status .hero-row { justify-content: center; margin-top: 22px; }
 .seat-lost { max-width: 620px; margin: 18px auto 0; text-align: center; }
+.apply-closed { cursor: not-allowed; opacity: .6; pointer-events: none; }
