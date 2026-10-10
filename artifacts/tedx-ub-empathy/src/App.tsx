@@ -301,16 +301,16 @@ function FitText({ text, className }: { text: string; className: string }) {
 const formatMnt = (amount: number) => `${amount.toLocaleString('en-US')}₮`;
 const ORGANIZER_EMAIL = 'Sergelenmunkhtushig@gmail.com';
 
-interface SeatState { taken: Set<number>; price: number | null; online: boolean }
+interface SeatState { taken: Set<number>; price: number | null; vipPrice: number | null; online: boolean }
 
 function useSeatAvailability() {
-  const [state, setState] = useState<SeatState>({ taken: new Set(), price: null, online: false });
+  const [state, setState] = useState<SeatState>({ taken: new Set(), price: null, vipPrice: null, online: false });
   const refresh = async () => {
     try {
       const res = await fetch('/api/seats', { cache: 'no-store' });
       if (!res.ok) throw new Error(String(res.status));
-      const data = (await res.json()) as { taken: number[]; price: number };
-      setState({ taken: new Set(data.taken), price: data.price, online: true });
+      const data = (await res.json()) as { taken: number[]; price: number; vipPrice?: number };
+      setState({ taken: new Set(data.taken), price: data.price, vipPrice: data.vipPrice ?? null, online: true });
     } catch {
       setState((prev) => ({ ...prev, online: false }));
     }
@@ -329,7 +329,7 @@ const checkoutErrors: Record<string, Bilingual> = {
   default: b('Online payment is unavailable right now. Please try again in a moment.', 'Онлайн төлбөр түр ажиллахгүй байна. Хэсэг хугацааны дараа дахин оролдоно уу.'),
 };
 
-function SeatCheckout({ seat, price, onTaken, onCancel }: { seat: number; price: number; onTaken: () => void; onCancel: () => void }) {
+function SeatCheckout({ seat, price, vip, onTaken, onCancel }: { seat: number; price: number; vip: boolean; onTaken: () => void; onCancel: () => void }) {
   const { tx, lang } = useLang();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<Bilingual | null>(null);
@@ -362,7 +362,7 @@ function SeatCheckout({ seat, price, onTaken, onCancel }: { seat: number; price:
   );
   return <form className="seat-checkout" onSubmit={submit} data-testid="form-seat-checkout">
     <div className="seat-checkout-head">
-      <div><span className="eyebrow">{tx(b('Your ticket', 'Таны тасалбар'))}</span><h4>{tx(b(`Seat #${seat}`, `№${seat} суудал`))}</h4></div>
+      <div><span className="eyebrow">{vip ? tx(b('VIP balcony · 2nd floor', 'VIP тагт · 2-р давхар')) : tx(b('Your ticket', 'Таны тасалбар'))}</span><h4>{tx(b(`${vip ? 'VIP seat' : 'Seat'} #${seat}`, `${vip ? 'VIP ' : ''}№${seat} суудал`))}</h4></div>
       <strong className="seat-checkout-price">{formatMnt(price)}</strong>
     </div>
     <div className="seat-checkout-grid">
@@ -384,10 +384,14 @@ function SeatCheckout({ seat, price, onTaken, onCancel }: { seat: number; price:
   </form>;
 }
 
-// Hall layout: 2x6 seats in each side wing, the rest in the centre (100 total).
-// Seats are numbered left wing 1-12, centre 13-88, right wing 89-100.
-const WING_SEATS = 12;
-const CENTER_SEATS = 100 - 2 * WING_SEATS;
+// Hall layout (100 seats): 84 in the main hall (1-84) and a VIP balcony on the
+// 2nd floor with one row of 8 on each side (left 85-92, right 93-100).
+const CENTER_SEATS = 84;
+const VIP_PER_SIDE = 8;
+const VIP_FIRST_SEAT = CENTER_SEATS + 1;
+const isVipSeat = (seat: number) => seat >= VIP_FIRST_SEAT;
+const DEFAULT_PRICE = 30000;
+const DEFAULT_VIP_PRICE = 40000;
 
 function SeatSelector() {
   const { tx } = useLang();
@@ -395,28 +399,36 @@ function SeatSelector() {
   const [size, setSize] = useState(() => (typeof window !== 'undefined' && window.innerWidth >= 900 ? 32 : 23));
   const [selected, setSelected] = useState<number | null>(null);
   const [lostSeat, setLostSeat] = useState<number | null>(null);
-  const { taken, price, online, refresh } = useSeatAvailability();
+  const { taken, price, vipPrice, online, refresh } = useSeatAvailability();
+  const standardPrice = price ?? DEFAULT_PRICE;
+  const balconyPrice = vipPrice ?? DEFAULT_VIP_PRICE;
   useEffect(() => { if (selected !== null && taken.has(selected)) { setLostSeat(selected); setSelected(null); } }, [taken, selected]);
-  const seat = (number: number) => <button key={number} className={`seat ${taken.has(number) ? 'taken' : ''} ${selected === number ? 'selected' : ''}`} disabled={taken.has(number)} onClick={() => { setLostSeat(null); setSelected(selected === number ? null : number); }} aria-label={`Seat ${number}`} data-testid={`button-seat-${number}`}>{number}</button>;
+  const seat = (number: number) => <button key={number} className={`seat ${isVipSeat(number) ? 'vip' : ''} ${taken.has(number) ? 'taken' : ''} ${selected === number ? 'selected' : ''}`} disabled={taken.has(number)} onClick={() => { setLostSeat(null); setSelected(selected === number ? null : number); }} aria-label={`${isVipSeat(number) ? 'VIP seat' : 'Seat'} ${number}`} data-testid={`button-seat-${number}`}>{number}</button>;
   const style = { '--seat-size': `${size}px` } as CSSProperties;
   return <div className="seat-panel reveal" id="seats">
     <div className="seat-header">
-      <div><h3>{tx(b('Hall Seat Availability', 'Танхимын суудлын мэдээлэл'))}</h3><p>{price ? tx(b(`Pick a seat and pay ${formatMnt(price)} with QPay to book it.`, `Суудлаа сонгоод QPay-ээр ${formatMnt(price)} төлж захиална уу.`)) : tx(b('Tap any available seat to reserve your spot.', 'Сул суудал дээр дарж суудлаа захиална уу.'))}</p></div>
+      <div><h3>{tx(b('Hall Seat Availability', 'Танхимын суудлын мэдээлэл'))}</h3><p>{tx(b(`Pick a seat and pay with QPay: ${formatMnt(standardPrice)} in the main hall, ${formatMnt(balconyPrice)} on the VIP balcony.`, `Суудлаа сонгоод QPay-ээр төлнө: танхимд ${formatMnt(standardPrice)}, VIP тагтанд ${formatMnt(balconyPrice)}.`))}</p></div>
       <div className="seat-count"><strong>{100 - taken.size}</strong><span>{tx(b('Seats remaining / 100 capacity', 'Үлдсэн суудал / нийт 100'))}</span></div>
     </div>
     <label className="seat-controls">{tx(b('View zoom', 'Томруулах'))}<input aria-label="Seat view zoom" type="range" min="18" max="40" value={size} onChange={(event) => setSize(Number(event.target.value))} data-testid="input-seat-zoom" /></label>
     <div className="stage"><div className="stage-bar" /><span>{tx(b('Main podium / stage', 'Гол тайз'))}</span></div>
     <div className="theater">
       <div className="theater-layout" style={style}>
-        <div className="wing left"><div className="wing-title">{tx(b(`Left wing (${WING_SEATS})`, `Зүүн жигүүр (${WING_SEATS})`))}</div><div className="seat-grid wing-grid">{Array.from({ length: WING_SEATS }, (_, i) => seat(i + 1))}</div></div>
-        <div className="wing"><div className="wing-title">{tx(b(`Center main (${CENTER_SEATS})`, `Төв хэсэг (${CENTER_SEATS})`))}</div><div className="seat-grid center-grid">{Array.from({ length: CENTER_SEATS }, (_, i) => seat(i + WING_SEATS + 1))}</div></div>
-        <div className="wing right"><div className="wing-title">{tx(b(`Right wing (${WING_SEATS})`, `Баруун жигүүр (${WING_SEATS})`))}</div><div className="seat-grid wing-grid">{Array.from({ length: WING_SEATS }, (_, i) => seat(i + WING_SEATS + CENTER_SEATS + 1))}</div></div>
+        <div className="wing"><div className="wing-title">{tx(b(`Main hall (${CENTER_SEATS}) · ${formatMnt(standardPrice)}`, `Танхим (${CENTER_SEATS}) · ${formatMnt(standardPrice)}`))}</div><div className="seat-grid center-grid">{Array.from({ length: CENTER_SEATS }, (_, i) => seat(i + 1))}</div></div>
+      </div>
+      <div className="balcony" style={style}>
+        <div className="balcony-title"><span className="vip-badge">VIP</span>{tx(b(`Balcony · 2nd floor · ${formatMnt(balconyPrice)}`, `Тагт · 2-р давхар · ${formatMnt(balconyPrice)}`))}</div>
+        <p className="balcony-note">{tx(b('Comfortable seats with a view of the stage from above.', 'Тайзыг дээрээс харах тухтай суудал.'))}</p>
+        <div className="balcony-rows">
+          <div className="balcony-side"><span>{tx(b('Left', 'Зүүн'))}</span><div className="seat-grid balcony-grid">{Array.from({ length: VIP_PER_SIDE }, (_, i) => seat(VIP_FIRST_SEAT + i))}</div></div>
+          <div className="balcony-side"><span>{tx(b('Right', 'Баруун'))}</span><div className="seat-grid balcony-grid">{Array.from({ length: VIP_PER_SIDE }, (_, i) => seat(VIP_FIRST_SEAT + VIP_PER_SIDE + i))}</div></div>
+        </div>
       </div>
     </div>
-    <div className="seat-legend"><span className="legend"><i />{tx(b('Available', 'Боломжтой'))}</span><span className="legend"><i className="red" />{tx(b('Selected', 'Сонгосон'))}</span><span className="legend"><i className="taken" />{tx(b('Taken', 'Захиалагдсан'))}</span></div>
+    <div className="seat-legend"><span className="legend"><i />{tx(b('Available', 'Боломжтой'))}</span><span className="legend"><i className="red" />{tx(b('Selected', 'Сонгосон'))}</span><span className="legend"><i className="taken" />{tx(b('Taken', 'Захиалагдсан'))}</span><span className="legend"><i className="vip" />{tx(b('VIP balcony', 'VIP тагт'))}</span></div>
     {lostSeat && !selected && <div className="seat-checkout-error seat-lost" role="alert">{tx(b(`Sorry — seat #${lostSeat} was just taken by someone else. Please pick another seat.`, `Уучлаарай, №${lostSeat} суудлыг саяхан өөр хүн авлаа. Өөр суудал сонгоно уу.`))}</div>}
     {selected && online && price
-      ? <SeatCheckout key={selected} seat={selected} price={price} onTaken={() => void refresh()} onCancel={() => setSelected(null)} />
+      ? <SeatCheckout key={selected} seat={selected} vip={isVipSeat(selected)} price={isVipSeat(selected) ? balconyPrice : standardPrice} onTaken={() => void refresh()} onCancel={() => setSelected(null)} />
       : selected && <div className="seat-selected" data-testid="status-selected-seat">{tx(b(`Seat #${selected} selected — online booking is unavailable right now, please message us to reserve it.`, `№${selected} суудал сонгогдлоо — онлайн захиалга түр ажиллахгүй байна, бидэнд зурвас илгээж захиална уу.`))}</div>}
   </div>;
 }
