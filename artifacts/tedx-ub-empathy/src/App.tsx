@@ -391,7 +391,8 @@ const CENTER_SEATS = 100 - 2 * WING_SEATS;
 
 function SeatSelector() {
   const { tx } = useLang();
-  const [size, setSize] = useState(23);
+  // Bigger seats on computers, where there's room; phones use a fixed compact size.
+  const [size, setSize] = useState(() => (typeof window !== 'undefined' && window.innerWidth >= 900 ? 32 : 23));
   const [selected, setSelected] = useState<number | null>(null);
   const [lostSeat, setLostSeat] = useState<number | null>(null);
   const { taken, price, online, refresh } = useSeatAvailability();
@@ -403,7 +404,7 @@ function SeatSelector() {
       <div><h3>{tx(b('Hall Seat Availability', 'Танхимын суудлын мэдээлэл'))}</h3><p>{price ? tx(b(`Pick a seat and pay ${formatMnt(price)} with QPay to book it.`, `Суудлаа сонгоод QPay-ээр ${formatMnt(price)} төлж захиална уу.`)) : tx(b('Tap any available seat to reserve your spot.', 'Сул суудал дээр дарж суудлаа захиална уу.'))}</p></div>
       <div className="seat-count"><strong>{100 - taken.size}</strong><span>{tx(b('Seats remaining / 100 capacity', 'Үлдсэн суудал / нийт 100'))}</span></div>
     </div>
-    <label className="seat-controls">{tx(b('View zoom', 'Томруулах'))}<input aria-label="Seat view zoom" type="range" min="15" max="32" value={size} onChange={(event) => setSize(Number(event.target.value))} data-testid="input-seat-zoom" /></label>
+    <label className="seat-controls">{tx(b('View zoom', 'Томруулах'))}<input aria-label="Seat view zoom" type="range" min="18" max="40" value={size} onChange={(event) => setSize(Number(event.target.value))} data-testid="input-seat-zoom" /></label>
     <div className="stage"><div className="stage-bar" /><span>{tx(b('Main podium / stage', 'Гол тайз'))}</span></div>
     <div className="theater">
       <div className="theater-layout" style={style}>
