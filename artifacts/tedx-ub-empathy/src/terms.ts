@@ -4,7 +4,7 @@
 type Bilingual = { en: string; mn: string };
 const b = (en: string, mn: string): Bilingual => ({ en, mn });
 
-export const TERMS_UPDATED = b('Last updated: 10 October 2026', 'Сүүлд шинэчилсэн: 2026 оны 10-р сарын 10');
+export const TERMS_UPDATED = b('Last updated: 10 October 2026 (VIP balcony added)', 'Сүүлд шинэчилсэн: 2026 оны 10-р сарын 10 (VIP тагт нэмэгдсэн)');
 
 export interface TermsSection {
   id: string;
@@ -18,6 +18,7 @@ export const termsSections: TermsSection[] = [
     title: b('1. Tickets and payment', '1. Тасалбар ба төлбөр'),
     points: [
       b('Each ticket is for one specific seat at TEDxUlaanbaatar Empathy School Youth on Sunday, 25 October 2026, at MONTE Ballroom, Ulaanbaatar.', 'Тасалбар бүр нь 2026 оны 10-р сарын 25-нд (Ням гараг) Улаанбаатар хотын МОНТЕ Боллрумд болох TEDxUlaanbaatar Empathy School Youth арга хэмжээний нэг тодорхой суудалд хамаарна.'),
+      b('Prices: 30,000₮ for a seat in the main hall and 40,000₮ for a VIP seat on the 2nd-floor balcony.', 'Үнэ: танхимын суудал 30,000₮, 2-р давхрын тагтны VIP суудал 40,000₮.'),
       b('Payment is made online with QPay through our payment provider, Bonum. Your seat is confirmed only after the payment is received and you see the confirmation page.', 'Төлбөрийг манай төлбөрийн үйлчилгээ үзүүлэгч Bonum-оор дамжуулан QPay-ээр онлайнаар хийнэ. Төлбөр орж, баталгаажуулах хуудас гарсны дараа л таны суудал баталгаажна.'),
       b('When you start checkout, your seat is held for 15 minutes. If payment is not completed in that time, the seat is released for others.', 'Төлбөр төлж эхлэхэд таны суудал 15 минут хадгалагдана. Энэ хугацаанд төлбөр хийгдээгүй бол суудал бусдад чөлөөлөгдөнө.'),
     ],

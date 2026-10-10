@@ -3,7 +3,7 @@
 // Returns: { followUpLink, transactionId } — the browser is sent to followUpLink to pay.
 import { randomUUID } from 'node:crypto';
 import { createInvoice } from './_lib/bonum.js';
-import { config, HOLD_SECONDS, json, TOTAL_SEATS } from './_lib/config.js';
+import { config, HOLD_SECONDS, isVipSeat, json, priceForSeat, TOTAL_SEATS } from './_lib/config.js';
 import { markUnpaid, reserveSeat, setInvoiceId } from './_lib/db.js';
 
 type Field = 'seat' | 'name' | 'phone' | 'email' | 'school' | 'terms';
@@ -38,7 +38,8 @@ export async function POST(request: Request): Promise<Response> {
   if (invalid.length) return json({ error: 'invalid_fields', fields: invalid }, 400);
 
   const transactionId = randomUUID();
-  const amount = config.ticketPrice();
+  // Price is set on the server from the seat: VIP balcony seats cost more.
+  const amount = priceForSeat(seat);
 
   try {
     const orderId = await reserveSeat({ transactionId, seat, name, phone, email, school, amount, holdSeconds: HOLD_SECONDS });
@@ -54,7 +55,7 @@ export async function POST(request: Request): Promise<Response> {
       transactionId,
       callback: `${config.siteUrl()}/api/payment-return?tx=${transactionId}`,
       expiresIn: HOLD_SECONDS,
-      title: `TEDxUlaanbaatar Empathy School Youth 2026 — Seat #${seat}`,
+      title: `TEDxUlaanbaatar Empathy School Youth 2026 — ${isVipSeat(seat) ? 'VIP balcony seat' : 'Seat'} #${seat}`,
       lang,
     });
     await setInvoiceId(transactionId, invoice.invoiceId);

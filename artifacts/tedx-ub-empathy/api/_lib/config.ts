@@ -2,6 +2,9 @@
 // variables and is never shipped to the browser.
 
 export const TOTAL_SEATS = 100;
+// VIP balcony (2nd floor): seats 85-100 (left 85-92, right 93-100).
+export const VIP_FIRST_SEAT = 85;
+export const isVipSeat = (seat: number) => seat >= VIP_FIRST_SEAT && seat <= TOTAL_SEATS;
 // How long a seat is held for someone while they pay, in seconds.
 export const HOLD_SECONDS = 15 * 60;
 
@@ -33,7 +36,14 @@ export const config = {
     if (!Number.isInteger(price) || price <= 0) throw new Error('TICKET_PRICE_MNT must be a positive integer');
     return price;
   },
+  vipPrice: () => {
+    const price = Number(process.env.VIP_PRICE_MNT || 40000);
+    if (!Number.isInteger(price) || price <= 0) throw new Error('VIP_PRICE_MNT must be a positive integer');
+    return price;
+  },
 };
+
+export const priceForSeat = (seat: number) => (isVipSeat(seat) ? config.vipPrice() : config.ticketPrice());
 
 export function json(data: unknown, status = 200, headers: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(data), {
