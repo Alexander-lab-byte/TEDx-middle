@@ -255,8 +255,8 @@ const speakers: SpeakerInfo[] = [
     name: 'Shijir Davaa',
     photo: speakerPhoto('shijir-davaa.jpg'),
     desc: b(
-      'Pianist for 10 years and drummer for 4, with 1st and 3rd place finishes at an international piano competition in Spain and 1st prize as drummer of electronic instruments at the "Asia Vision" international competition. A lifelong astronomy enthusiast who has pursued the subject through numerous science olympiads.',
-      'Испанид болсон олон улсын төгөлдөр хуурын тэмцээнд 1, 3-р байр эзэлж, "Asia Vision" олон улсын тэмцээнд цахим хөгжмийн хэрэгслийн бөмбөрчөөр 1-р байр эзэлсэн. 10 жил төгөлдөр хуур, 4 жил бөмбөр тоглосон. Багаасаа одон орон судлалд дуртай бөгөөд олон шинжлэх ухааны олимпиадад оролцсоор ирсэн.',
+      "Environmental research intern at the Institute of Geography and Geoecology in Mongolia, studying land degradation through satellite data. Inspired by his grandmother's land in Dundgovi, he has worked on community tree planting, local field training, and translating a $1 million government agreement on desertification.",
+      'Монгол Улсын Газарзүй, геоэкологийн хүрээлэнгийн байгаль орчны судалгааны дадлагажигч бөгөөд хиймэл дагуулын мэдээллээр газрын доройтлыг судалдаг. Дундговь дахь эмээгийнхээ нутгаас санаа авч олон нийтийн мод тарих ажил, орон нутгийн хээрийн сургалтад оролцож, цөлжилтийн эсрэг 1 сая ам.долларын засгийн газрын гэрээг орчуулахад хувь нэмрээ оруулсан.',
     ),
   },
   {
