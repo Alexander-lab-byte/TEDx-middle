@@ -325,6 +325,8 @@ function useSeatAvailability() {
 
 const checkoutErrors: Record<string, Bilingual> = {
   seat_taken: b('Sorry — someone just took that seat. Please pick another one.', 'Уучлаарай, энэ суудлыг саяхан өөр хүн авлаа. Өөр суудал сонгоно уу.'),
+  invalid_code: b('That code is not valid. Check it, or leave it empty to pay the normal price.', 'Энэ код буруу байна. Шалгаад дахин оруулна уу, эсвэл хоосон орхиж энгийн үнээр төлнө үү.'),
+  code_used: b('That code has already been used.', 'Энэ кодыг аль хэдийн ашигласан байна.'),
   invalid_fields: b('Please check the highlighted fields.', 'Тэмдэглэгдсэн талбаруудаа шалгана уу.'),
   default: b('Online payment is unavailable right now. Please try again in a moment.', 'Онлайн төлбөр түр ажиллахгүй байна. Хэсэг хугацааны дараа дахин оролдоно уу.'),
 };
@@ -334,6 +336,7 @@ function SeatCheckout({ seat, price, vip, onTaken, onCancel }: { seat: number; p
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<Bilingual | null>(null);
   const [badFields, setBadFields] = useState<string[]>([]);
+  const [showCode, setShowCode] = useState(false);
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -342,7 +345,7 @@ function SeatCheckout({ seat, price, vip, onTaken, onCancel }: { seat: number; p
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ seat, lang, agree: data.get('agree') === 'on', name: data.get('name'), phone: data.get('phone'), email: data.get('email'), school: data.get('school') }),
+        body: JSON.stringify({ seat, lang, agree: data.get('agree') === 'on', name: data.get('name'), phone: data.get('phone'), email: data.get('email'), school: data.get('school'), code: String(data.get('code') ?? '').trim() || undefined }),
       });
       const body = (await res.json().catch(() => ({}))) as { followUpLink?: string; error?: string; fields?: string[] };
       if (res.ok && body.followUpLink) { window.location.href = body.followUpLink; return; }
@@ -371,6 +374,13 @@ function SeatCheckout({ seat, price, vip, onTaken, onCancel }: { seat: number; p
       {field('email', b('Email', 'И-мэйл'), 'email', 'name@example.com', 'email')}
       {field('school', b('School / class', 'Сургууль / анги'), 'text', b('e.g. Empathy School, 11a', 'Жнь: Эмпати сургууль, 11а'), 'organization')}
     </div>
+    {showCode
+      ? <div className={`form-field seat-checkout-code ${badFields.includes('code') ? 'invalid' : ''}`}>
+          <label htmlFor="checkout-code">{tx(b('Promo code', 'Урамшууллын код'))}</label>
+          <input id="checkout-code" name="code" type="text" autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="WIN-XXXXXX" data-testid="input-checkout-code" />
+          <small>{tx(b('The discounted price is shown on the QPay payment page.', 'Хөнгөлөлттэй үнэ QPay төлбөрийн хуудсанд харагдана.'))}</small>
+        </div>
+      : <button type="button" className="seat-checkout-code-toggle" onClick={() => setShowCode(true)} data-testid="button-show-code">{tx(b('Have a promo code?', 'Урамшууллын код байгаа юу?'))}</button>}
     <label className={`seat-checkout-agree ${badFields.includes('terms') ? 'invalid' : ''}`}>
       <input type="checkbox" name="agree" required data-testid="checkbox-agree-terms" />
       <span>{tx(b('I agree to the ', 'Би '))}<a href="/terms" target="_blank" rel="noopener noreferrer">{tx(b('ticket terms and privacy policy', 'тасалбарын нөхцөл, нууцлалын бодлогыг'))}</a>{tx(b(', and understand that tickets are non-refundable.', ' зөвшөөрч, тасалбарын төлбөр буцаагдахгүйг ойлгосон.'))}</span>

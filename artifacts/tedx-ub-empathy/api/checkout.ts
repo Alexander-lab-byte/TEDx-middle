@@ -1,12 +1,12 @@
 // POST /api/checkout — hold a seat and create a Bonum (QPay) invoice.
-// Body: { seat, name, phone, email, school, agree: true, lang? }  (agree = accepted the ticket terms)
+// Body: { seat, name, phone, email, school, agree: true, lang?, code? }  (code = optional promo code)  (agree = accepted the ticket terms)
 // Returns: { followUpLink, transactionId } — the browser is sent to followUpLink to pay.
 import { randomUUID } from 'node:crypto';
 import { createInvoice } from './_lib/bonum.js';
 import { config, HOLD_SECONDS, isVipSeat, json, priceForSeat, TOTAL_SEATS } from './_lib/config.js';
-import { markUnpaid, reserveSeat, setInvoiceId } from './_lib/db.js';
+import { markUnpaid, reserveSeat, reserveSeatWithCode, setInvoiceId } from './_lib/db.js';
 
-type Field = 'seat' | 'name' | 'phone' | 'email' | 'school' | 'terms';
+type Field = 'seat' | 'name' | 'phone' | 'email' | 'school' | 'terms' | 'code';
 
 function clean(value: unknown, max: number): string {
   return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ').slice(0, max) : '';
@@ -26,6 +26,7 @@ export async function POST(request: Request): Promise<Response> {
   const email = clean(input.email, 200);
   const school = clean(input.school, 160);
   const lang = input.lang === 'en' ? 'en' : 'mn';
+  const code = clean(input.code, 40).toUpperCase();
 
   const invalid: Field[] = [];
   if (!Number.isInteger(seat) || seat < 1 || seat > TOTAL_SEATS) invalid.push('seat');
@@ -38,12 +39,20 @@ export async function POST(request: Request): Promise<Response> {
   if (invalid.length) return json({ error: 'invalid_fields', fields: invalid }, 400);
 
   const transactionId = randomUUID();
-  // Price is set on the server from the seat: VIP balcony seats cost more.
-  const amount = priceForSeat(seat);
+  // Price is set on the server from the seat (VIP balcony seats cost more),
+  // or from a valid promo code, which the database checks and uses up atomically.
+  let amount = priceForSeat(seat);
 
   try {
-    const orderId = await reserveSeat({ transactionId, seat, name, phone, email, school, amount, holdSeconds: HOLD_SECONDS });
-    if (!orderId) return json({ error: 'seat_taken' }, 409);
+    if (code) {
+      const result = await reserveSeatWithCode(code, { transactionId, seat, name, phone, email, school, holdSeconds: HOLD_SECONDS });
+      if (result.error === 'seat_taken') return json({ error: 'seat_taken' }, 409);
+      if (result.error) return json({ error: result.error, fields: ['code'] }, 400);
+      amount = result.amount;
+    } else {
+      const orderId = await reserveSeat({ transactionId, seat, name, phone, email, school, amount, holdSeconds: HOLD_SECONDS });
+      if (!orderId) return json({ error: 'seat_taken' }, 409);
+    }
   } catch (error) {
     console.error('reserve seat failed', error);
     return json({ error: 'unavailable' }, 503);
@@ -59,7 +68,7 @@ export async function POST(request: Request): Promise<Response> {
       lang,
     });
     await setInvoiceId(transactionId, invoice.invoiceId);
-    return json({ followUpLink: invoice.followUpLink, transactionId });
+    return json({ followUpLink: invoice.followUpLink, transactionId, amount });
   } catch (error) {
     console.error('create invoice failed', error);
     // Release the seat so someone else can pick it.

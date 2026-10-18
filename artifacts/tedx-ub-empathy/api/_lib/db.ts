@@ -58,6 +58,24 @@ export function reserveSeat(o: NewOrder): Promise<string | null> {
   });
 }
 
+export type PromoReserveResult =
+  | { order_id: string; amount: number; error?: undefined }
+  | { error: 'invalid_code' | 'code_used' | 'seat_taken' };
+
+/** Holds a seat at a promo-code price (e.g. the tournament winner's 100₮ ticket). */
+export function reserveSeatWithCode(code: string, o: Omit<NewOrder, 'amount'>): Promise<PromoReserveResult> {
+  return rpc<PromoReserveResult>('tedx_reserve_seat_promo', {
+    p_code: code,
+    p_transaction_id: o.transactionId,
+    p_seat: o.seat,
+    p_name: o.name,
+    p_phone: o.phone,
+    p_email: o.email,
+    p_school: o.school,
+    p_hold_seconds: o.holdSeconds,
+  });
+}
+
 export async function takenSeats(): Promise<number[]> {
   const rows = await rpc<Array<number | { tedx_taken_seats: number }>>('tedx_taken_seats', {});
   return rows.map((r) => (typeof r === 'number' ? r : r.tedx_taken_seats));
