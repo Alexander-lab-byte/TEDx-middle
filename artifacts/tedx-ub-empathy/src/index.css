@@ -494,6 +494,11 @@ a { color: inherit; text-decoration: none; }
 .footer-credit { display: inline-block; margin-top: 8px; color: var(--dim); font-size: 11px; }
 
 /* ---------- Terms & privacy ---------- */
+/* The toggle sits at the start of a line, then the code field. */
+.seat-checkout-code-toggle { display: block; margin: 0 0 12px; padding: 0; border: 0; background: none; color: var(--ted-hi); font-size: 12px; text-decoration: underline; cursor: pointer; }
+.seat-checkout-code { margin-bottom: 14px; }
+.seat-checkout-code input { text-transform: uppercase; letter-spacing: .06em; }
+.seat-checkout-code small { display: block; margin-top: 6px; color: var(--dim); font-size: 11px; }
 .seat-checkout-agree { display: flex; align-items: flex-start; gap: 10px; margin: 2px 0 14px; color: var(--muted); font-size: 12px; line-height: 1.5; cursor: pointer; }
 .seat-checkout-agree input { flex: none; width: 16px; height: 16px; margin-top: 1px; accent-color: var(--ted); }
 .seat-checkout-agree a { color: var(--ted-hi); text-decoration: underline; }
