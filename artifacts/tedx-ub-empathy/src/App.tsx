@@ -229,7 +229,16 @@ const speakers: SpeakerInfo[] = [
       'Монголын ахлах ангийн сурагч бөгөөд сансар судлал, aerospace инженерчлэл, шинжлэх ухаан, технологид ихээхэн сонирхолтой. Пуужин бүтээх, электроник болон 3D хэвлэлийн төсөл дээр ажиллаж шинэ зүйл туршиж өөрийн гараар бүтээж сурах хүсэл эрмэлзэлтэй. Цаашдаа инженерийн мэдлэг ур чадвараа хөгжүүлж Монголын сансар технологийн салбарын хөгжилд хувь нэмэр оруулна.',
     ),
   },
-  { category: 'internal', type: speakerCategoryLabel.internal, desc: announcedSoon },
+  {
+    category: 'internal',
+    type: speakerCategoryLabel.internal,
+    name: 'Gabriel Balane',
+    photo: speakerPhoto('gabriel-balane.jpg'),
+    desc: b(
+      'A student from the Philippines at GCF International Christian School. He believes it is beautiful when people from different backgrounds come together to share ideas freely, and hopes to learn a lot about Mongolia during his stay.',
+      'Филиппин улсаас ирсэн, GCF International Christian School-ийн сурагч. Өөр өөр орчноос ирсэн хүмүүс нэгдэж санаагаа чөлөөтэй хуваалцах нь гайхалтай гэж үздэг бөгөөд Монголд байх хугацаандаа Монголын талаар их зүйл сурахыг хүсдэг.',
+    ),
+  },
   {
     category: 'external-student',
     type: speakerCategoryLabel['external-student'],
@@ -283,16 +292,6 @@ const speakers: SpeakerInfo[] = [
   {
     category: 'alumni',
     type: speakerCategoryLabel.alumni,
-    name: 'Gabriel Balane',
-    photo: speakerPhoto('gabriel-balane.jpg'),
-    desc: b(
-      'A student from the Philippines at GCF International Christian School. He believes it is beautiful when people from different backgrounds come together to share ideas freely, and hopes to learn a lot about Mongolia during his stay.',
-      'Филиппин улсаас ирсэн, GCF International Christian School-ийн сурагч. Өөр өөр орчноос ирсэн хүмүүс нэгдэж санаагаа чөлөөтэй хуваалцах нь гайхалтай гэж үздэг бөгөөд Монголд байх хугацаандаа Монголын талаар их зүйл сурахыг хүсдэг.',
-    ),
-  },
-  {
-    category: 'alumni',
-    type: speakerCategoryLabel.alumni,
     name: 'Manlaibaatar Purevsuren',
     photo: speakerPhoto('manlaibaatar-purevsuren.jpg'),
     desc: b(
@@ -300,6 +299,7 @@ const speakers: SpeakerInfo[] = [
       'Монгол Улсын Их Сургуулийн химич, судлаач, багш. Нүүрстөрөгч барих, ашиглах, хадгалах (CCUS) болон CO₂-ыг катализаар үнэ цэнэтэй химийн бодис, нүүрсустөрөгч болгон хувиргах чиглэлээр мэргэшсэн. Шинжлэх ухааны хөгжил, шүүмжлэлт сэтгэлгээ, тогтвортой технологийг дэмждэг.',
     ),
   },
+  { category: 'alumni', type: speakerCategoryLabel.alumni, desc: announcedSoon },
   {
     category: 'distinguished',
     type: speakerCategoryLabel.distinguished,
