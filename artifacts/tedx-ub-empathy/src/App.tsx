@@ -303,7 +303,7 @@ const speakers: SpeakerInfo[] = [
   {
     category: 'distinguished',
     type: speakerCategoryLabel.distinguished,
-    name: 'Gan-Erdene Gigi Gansukh',
+    name: 'Gan-Erdene Gansukh',
     photo: speakerPhoto('gan-erdene-gansukh.jpg'),
     desc: b(
       'Business and finance professional, content creator and youth advocate.',
@@ -323,7 +323,7 @@ const speakers: SpeakerInfo[] = [
   {
     category: 'distinguished',
     type: speakerCategoryLabel.distinguished,
-    name: 'Norovyn Altankhuyag',
+    name: 'Norov Altankhuyag',
     photo: speakerPhoto('altankhuyag-norov.jpg'),
     desc: b(
       '27th Prime Minister of Mongolia and Member of the State Great Khural (Parliament).',
