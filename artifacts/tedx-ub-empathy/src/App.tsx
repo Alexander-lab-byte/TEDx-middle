@@ -299,10 +299,9 @@ const speakers: SpeakerInfo[] = [
       'Монгол Улсын Их Сургуулийн химич, судлаач, багш. Нүүрстөрөгч барих, ашиглах, хадгалах (CCUS) болон CO₂-ыг катализаар үнэ цэнэтэй химийн бодис, нүүрсустөрөгч болгон хувиргах чиглэлээр мэргэшсэн. Шинжлэх ухааны хөгжил, шүүмжлэлт сэтгэлгээ, тогтвортой технологийг дэмждэг.',
     ),
   },
-  { category: 'alumni', type: speakerCategoryLabel.alumni, desc: announcedSoon },
   {
-    category: 'distinguished',
-    type: speakerCategoryLabel.distinguished,
+    category: 'alumni',
+    type: speakerCategoryLabel.alumni,
     name: 'Gan-Erdene Gansukh',
     photo: speakerPhoto('gan-erdene-gansukh.jpg'),
     desc: b(
@@ -323,13 +322,14 @@ const speakers: SpeakerInfo[] = [
   {
     category: 'distinguished',
     type: speakerCategoryLabel.distinguished,
-    name: 'Norov Altankhuyag',
+    name: 'Altankhuyag Norov',
     photo: speakerPhoto('altankhuyag-norov.jpg'),
     desc: b(
       '27th Prime Minister of Mongolia and Member of the State Great Khural (Parliament).',
       'Монгол Улсын 27 дахь Ерөнхий сайд, УИХ-ын гишүүн.',
     ),
   },
+  { category: 'distinguished', type: speakerCategoryLabel.distinguished, desc: announcedSoon },
 ];
 
 // Shows text on a single line, shrinking the font just enough to fit the box
