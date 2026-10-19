@@ -176,7 +176,7 @@ function Countdown() {
   </div>;
 }
 
-type SpeakerCategory = 'internal' | 'external-student' | 'guest';
+type SpeakerCategory = 'internal' | 'external-student' | 'alumni' | 'distinguished';
 
 interface SpeakerInfo {
   category: SpeakerCategory;
@@ -189,13 +189,14 @@ interface SpeakerInfo {
 const speakerCategoryLabel: Record<SpeakerCategory, Bilingual> = {
   internal: b('Local Student Speaker', 'Дотоод сурагч илтгэгч'),
   'external-student': b('External Student Speaker', 'Гадаад сурагч илтгэгч'),
-  guest: b('Guest Speaker', 'Зочин илтгэгч'),
+  alumni: b('Alumni Speaker', 'Төгсөгч илтгэгч'),
+  distinguished: b('Distinguished Speaker', 'Эрхэм илтгэгч'),
 };
 
 const announcedSoon = b('Speaker to be announced.', 'Илтгэгч тун удахгүй зарлагдана.');
 
-// 14 speakers across three groups: 4 local (school) students, 4 external
-// students and 6 guest speakers. Only confirmed speakers carry a name/photo/bio —
+// 14 speakers: 4 local (school) students, 4 external students,
+// 3 alumni and 3 distinguished speakers. Only confirmed speakers carry a name/photo/bio —
 // the rest render as "to be announced" placeholders until finalized.
 const speakers: SpeakerInfo[] = [
   {
@@ -270,18 +271,8 @@ const speakers: SpeakerInfo[] = [
     ),
   },
   {
-    category: 'guest',
-    type: speakerCategoryLabel.guest,
-    name: 'Gan-Erdene Gigi Gansukh',
-    photo: speakerPhoto('gan-erdene-gansukh.jpg'),
-    desc: b(
-      'Business and finance professional, content creator and youth advocate.',
-      'Бизнес, санхүүгийн мэргэжилтэн, контент бүтээгч, залуучуудын төлөө идэвхтэн.',
-    ),
-  },
-  {
-    category: 'guest',
-    type: speakerCategoryLabel.guest,
+    category: 'alumni',
+    type: speakerCategoryLabel.alumni,
     name: 'Tsogt Dorjderem',
     photo: speakerPhoto('tsogt-dorjderem.jpg'),
     desc: b(
@@ -290,18 +281,8 @@ const speakers: SpeakerInfo[] = [
     ),
   },
   {
-    category: 'guest',
-    type: speakerCategoryLabel.guest,
-    name: 'Tsatsral Oyundalai',
-    photo: speakerPhoto('tsatsral-oyundalai.jpg'),
-    desc: b(
-      'Head of the United Association of Mongolian FM Radio Stations, education lecturer, journalist, nutritionist, and Miss Global Ambassador 2019.',
-      'Монголын ФМ радионуудын нэгдсэн холбооны тэргүүн, боловсролын лектор, сэтгүүлч, хоол зүйч, Miss Global Ambassador 2019.',
-    ),
-  },
-  {
-    category: 'guest',
-    type: speakerCategoryLabel.guest,
+    category: 'alumni',
+    type: speakerCategoryLabel.alumni,
     name: 'Gabriel Balane',
     photo: speakerPhoto('gabriel-balane.jpg'),
     desc: b(
@@ -310,8 +291,8 @@ const speakers: SpeakerInfo[] = [
     ),
   },
   {
-    category: 'guest',
-    type: speakerCategoryLabel.guest,
+    category: 'alumni',
+    type: speakerCategoryLabel.alumni,
     name: 'Manlaibaatar Purevsuren',
     photo: speakerPhoto('manlaibaatar-purevsuren.jpg'),
     desc: b(
@@ -320,8 +301,28 @@ const speakers: SpeakerInfo[] = [
     ),
   },
   {
-    category: 'guest',
-    type: speakerCategoryLabel.guest,
+    category: 'distinguished',
+    type: speakerCategoryLabel.distinguished,
+    name: 'Gan-Erdene Gigi Gansukh',
+    photo: speakerPhoto('gan-erdene-gansukh.jpg'),
+    desc: b(
+      'Business and finance professional, content creator and youth advocate.',
+      'Бизнес, санхүүгийн мэргэжилтэн, контент бүтээгч, залуучуудын төлөө идэвхтэн.',
+    ),
+  },
+  {
+    category: 'distinguished',
+    type: speakerCategoryLabel.distinguished,
+    name: 'Tsatsral Oyundalai',
+    photo: speakerPhoto('tsatsral-oyundalai.jpg'),
+    desc: b(
+      'Head of the United Association of Mongolian FM Radio Stations, education lecturer, journalist, nutritionist, and Miss Global Ambassador 2019.',
+      'Монголын ФМ радионуудын нэгдсэн холбооны тэргүүн, боловсролын лектор, сэтгүүлч, хоол зүйч, Miss Global Ambassador 2019.',
+    ),
+  },
+  {
+    category: 'distinguished',
+    type: speakerCategoryLabel.distinguished,
     name: 'Norovyn Altankhuyag',
     photo: speakerPhoto('altankhuyag-norov.jpg'),
     desc: b(
@@ -645,7 +646,7 @@ function Home() {
              <SeatSelector />
            </div>
          </section>
-          <section className="section" id="speakers"><div className="wrap reveal"><div className="eyebrow">{tx(b('02 / On Stage', '02 / Тайзнаа'))}</div><h2 className="section-title">{tx(b('14 Live Speakers', '14 Илтгэгч'))}</h2><div className="speakers-head"><div className="pills"><span className="pill"><b>4</b>{tx(b('Local Students', 'Дотоод сурагчид'))}</span><span className="pill"><b>4</b>{tx(b('External Students', 'Гадаад сурагчид'))}</span><span className="pill"><b>6</b>{tx(b('Guest Speakers', 'Зочин илтгэгчид'))}</span></div><div className="scroll-buttons"><button className="icon-button" onClick={() => scrollSpeakers(-260)} aria-label="Scroll speakers left" data-testid="button-speakers-left"><ArrowLeft size={16} /></button><button className="icon-button" onClick={() => scrollSpeakers(260)} aria-label="Scroll speakers right" data-testid="button-speakers-right"><ArrowRight size={16} /></button></div></div><div className="speaker-scroll" ref={speakerRef}>{speakers.map((info, index) => { const type = tx(info.type); const desc = tx(info.desc); const displayName = info.name ?? tx(b(`Speaker #${String(index + 1).padStart(2, '0')}`, `Илтгэгч #${String(index + 1).padStart(2, '0')}`)); return <button className="speaker-card" key={`${type}-${index}`} onClick={() => setSpeaker({ index: index + 1, type, name: info.name, photo: info.photo, desc })} data-testid={`button-speaker-${index + 1}`}><div className={`speaker-avatar ${info.photo ? 'has-photo' : ''}`}>{info.photo ? <img src={info.photo} alt={info.name ?? ''} /> : '?'}<div className="speaker-avatar-overlay"><p className="speaker-avatar-desc">{desc}</p><span className="speaker-avatar-cta">{tx(b('View full profile', 'Дэлгэрэнгүй харах'))}</span></div></div><div className="speaker-type">{type}</div><FitText className="speaker-name" text={displayName} /><p className="speaker-desc">{desc}</p></button>; })}</div></div></section>
+          <section className="section" id="speakers"><div className="wrap reveal"><div className="eyebrow">{tx(b('02 / On Stage', '02 / Тайзнаа'))}</div><h2 className="section-title">{tx(b('14 Live Speakers', '14 Илтгэгч'))}</h2><div className="speakers-head"><div className="pills"><span className="pill"><b>4</b>{tx(b('Local Students', 'Дотоод сурагчид'))}</span><span className="pill"><b>4</b>{tx(b('External Students', 'Гадаад сурагчид'))}</span><span className="pill"><b>3</b>{tx(b('Alumni', 'Төгсөгчид'))}</span><span className="pill"><b>3</b>{tx(b('Distinguished Speakers', 'Эрхэм илтгэгчид'))}</span></div><div className="scroll-buttons"><button className="icon-button" onClick={() => scrollSpeakers(-260)} aria-label="Scroll speakers left" data-testid="button-speakers-left"><ArrowLeft size={16} /></button><button className="icon-button" onClick={() => scrollSpeakers(260)} aria-label="Scroll speakers right" data-testid="button-speakers-right"><ArrowRight size={16} /></button></div></div><div className="speaker-scroll" ref={speakerRef}>{speakers.map((info, index) => { const type = tx(info.type); const desc = tx(info.desc); const displayName = info.name ?? tx(b(`Speaker #${String(index + 1).padStart(2, '0')}`, `Илтгэгч #${String(index + 1).padStart(2, '0')}`)); return <button className="speaker-card" key={`${type}-${index}`} onClick={() => setSpeaker({ index: index + 1, type, name: info.name, photo: info.photo, desc })} data-testid={`button-speaker-${index + 1}`}><div className={`speaker-avatar ${info.photo ? 'has-photo' : ''}`}>{info.photo ? <img src={info.photo} alt={info.name ?? ''} /> : '?'}<div className="speaker-avatar-overlay"><p className="speaker-avatar-desc">{desc}</p><span className="speaker-avatar-cta">{tx(b('View full profile', 'Дэлгэрэнгүй харах'))}</span></div></div><div className="speaker-type">{type}</div><FitText className="speaker-name" text={displayName} /><p className="speaker-desc">{desc}</p></button>; })}</div></div></section>
          <section className="section schedule" id="schedule"><div className="wrap reveal"><div className="eyebrow">{tx(b('03 / Timetable', '03 / Цагийн хуваарь'))}</div><h2 className="section-title">{tx(b('Event Schedule (Coming Soon)', 'Арга хэмжээний хөтөлбөр (Тун удахгүй)'))}</h2><p className="muted">{tx(b('Click on a session below to view details.', 'Доорх хэсэгт дарж дэлгэрэнгүй хуваарийг харна уу.'))}</p><div className="schedule-list">{sessions.map(([title, time, rows], index) => <div className={`session ${openSession === index ? 'open' : ''}`} key={title.en}><button className="session-header" onClick={() => setOpenSession(openSession === index ? null : index)} aria-expanded={openSession === index} data-testid={`button-schedule-${index}`}><div><h3>{tx(title)}</h3><span className="session-badge">{time}</span></div><span className="toggle">{openSession === index ? '−' : '+'}</span></button><div className="session-items">{rows.map(([rowTime, event]) => <div className="schedule-row" key={rowTime}><div className="time">{rowTime}</div><div className="event">{tx(event)}</div></div>)}</div></div>)}</div></div></section>
           <section className="section" id="contact"><div className="wrap reveal"><div className="eyebrow">{tx(b('04 / Get In Touch', '04 / Холбоо барих'))}</div><h2 className="section-title">{tx(b('Reach Out to Our Team', 'Бидэнтэй холбогдох'))}</h2><div className="contact-grid"><div className="info-card"><h3>{tx(b('Organizers', 'Зохион байгуулагчид'))}</h3><div className="organizer"><div><strong>Munkhtushig Sergelen</strong><p data-nosnippet="">{tx(b('Licensee, Lead Organizer & Chief Operations Director (Strategy & Execution)', 'Франчайз эзэмшигч, ахлах зохион байгуулагч ба үйл ажиллагааны ерөнхий захирал (стратеги ба гүйцэтгэл)'))}</p></div><span>01</span></div><div className="organizer"><div><strong>Munkh-Erdene Ganbold</strong><p>{tx(b('Co-organizer', 'Хамтран зохион байгуулагч'))}</p></div><span>02</span></div><div className="socials"><a href="mailto:hello@tedxubempathy.school"><Mail size={14} />Email</a></div></div><div className="form-card"><h3>{tx(b('Send a Message', 'Зурвас илгээх'))}</h3><form onSubmit={(event) => {
               event.preventDefault();
