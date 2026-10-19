@@ -323,7 +323,7 @@ const speakers: SpeakerInfo[] = [
   {
     category: 'distinguished',
     type: speakerCategoryLabel.distinguished,
-    name: 'Norov Altankhuyag',
+    name: 'Altankhuyag Norov',
     photo: speakerPhoto('altankhuyag-norov.jpg'),
     desc: b(
       '27th Prime Minister of Mongolia and Member of the State Great Khural (Parliament).',
