@@ -176,7 +176,7 @@ function Countdown() {
   </div>;
 }
 
-type SpeakerCategory = 'internal' | 'external-student' | 'guest';
+type SpeakerCategory = 'internal' | 'external-student' | 'alumni' | 'influencer';
 
 interface SpeakerInfo {
   category: SpeakerCategory;
@@ -187,15 +187,16 @@ interface SpeakerInfo {
 }
 
 const speakerCategoryLabel: Record<SpeakerCategory, Bilingual> = {
-  internal: b('Internal Student Speaker', 'Дотоод сурагч илтгэгч'),
+  internal: b('Local Student Speaker', 'Дотоод сурагч илтгэгч'),
   'external-student': b('External Student Speaker', 'Гадаад сурагч илтгэгч'),
-  guest: b('Guest Speaker', 'Зочин илтгэгч'),
+  alumni: b('Alumni Speaker', 'Төгсөгч илтгэгч'),
+  influencer: b('Influencer Speaker', 'Инфлюэнсер илтгэгч'),
 };
 
 const announcedSoon = b('Speaker to be announced.', 'Илтгэгч тун удахгүй зарлагдана.');
 
-// 12 speakers across three groups: 4 school students, 4 visiting students,
-// and 4 guest speakers. Only confirmed speakers carry a name/photo/bio —
+// 14 speakers across four groups: 4 local (school) students, 4 external
+// students, 3 alumni and 3 influencers. Only confirmed speakers carry a name/photo/bio —
 // the rest render as "to be announced" placeholders until finalized.
 const speakers: SpeakerInfo[] = [
   {
@@ -269,10 +270,12 @@ const speakers: SpeakerInfo[] = [
       'Үндэсний Физик, Математикийн олимпиадын медальт, тэргүүн шалгуулагч. Физик, математик, химийн чиглэлээр олон улсын болон дүүргийн олон шагнал хүртсэн.',
     ),
   },
-  { category: 'guest', type: speakerCategoryLabel.guest, desc: announcedSoon },
-  { category: 'guest', type: speakerCategoryLabel.guest, desc: announcedSoon },
-  { category: 'guest', type: speakerCategoryLabel.guest, desc: announcedSoon },
-  { category: 'guest', type: speakerCategoryLabel.guest, desc: announcedSoon },
+  { category: 'alumni', type: speakerCategoryLabel.alumni, desc: announcedSoon },
+  { category: 'alumni', type: speakerCategoryLabel.alumni, desc: announcedSoon },
+  { category: 'alumni', type: speakerCategoryLabel.alumni, desc: announcedSoon },
+  { category: 'influencer', type: speakerCategoryLabel.influencer, desc: announcedSoon },
+  { category: 'influencer', type: speakerCategoryLabel.influencer, desc: announcedSoon },
+  { category: 'influencer', type: speakerCategoryLabel.influencer, desc: announcedSoon },
 ];
 
 // Shows text on a single line, shrinking the font just enough to fit the box
@@ -574,7 +577,7 @@ function Home() {
           <div className="wrap hero-content">
             <h1 className="hero-opening-title">{tx(b('TEDx Ulaanbaatar Empathy School Youth 2026', 'TEDx Улаанбаатар Эмпати Сургуулийн Залуус 2026'))}</h1>
             <div className="hero-center-mark reveal"><img src={`${media}tedx-ub-empathy-white.png`} alt="TEDx Ulaanbaatar Empathy School Youth" /></div>
-            <p className="hero-intro reveal delay-1">{tx(b('12 voices. 100 seats. One day of live student ideas, teacher perspectives, and youth-led innovation in Ulaanbaatar.', '12 дуу хоолой. 100 суудал. Улаанбаатар хотын сурагчдын идэвхи санаачилга, багш нарын үзэл бодол, залуусын инновацийг түгээх нэг өдөр.'))}</p>
+            <p className="hero-intro reveal delay-1">{tx(b('14 voices. 100 seats. One day of live student ideas, teacher perspectives, and youth-led innovation in Ulaanbaatar.', '14 дуу хоолой. 100 суудал. Улаанбаатар хотын сурагчдын идэвхи санаачилга, багш нарын үзэл бодол, залуусын инновацийг түгээх нэг өдөр.'))}</p>
             <Countdown />
             <div className="hero-row reveal delay-2"><Link href="/#seats" onClick={(event) => scrollToSection(event, 'seats')} className="button" data-testid="link-hero-reserve">{tx(b('Reserve your seat', 'Суудлаа захиалах'))}</Link><Link href="/#speakers" onClick={(event) => scrollToSection(event, 'speakers')} className="button ghost" data-testid="link-hero-speakers">{tx(b('Meet the speakers', 'Илтгэгчидтэй танилцах'))}</Link></div>
             <div className="hero-meta reveal delay-3"><span>{tx(b('Sunday, October 25, 2026', '2026 оны 10-р сарын 25, Ням гараг'))}</span><b>•</b>{tx(b('MONTE Ballroom, Ulaanbaatar', 'МОНТЕ Боллрум, Улаанбаатар'))}</div>
@@ -589,7 +592,7 @@ function Home() {
              <SeatSelector />
            </div>
          </section>
-          <section className="section" id="speakers"><div className="wrap reveal"><div className="eyebrow">{tx(b('02 / On Stage', '02 / Тайзнаа'))}</div><h2 className="section-title">{tx(b('12 Live Speakers', '12 Илтгэгч'))}</h2><div className="speakers-head"><div className="pills"><span className="pill"><b>4</b>{tx(b('Internal Students', 'Дотоод сурагчид'))}</span><span className="pill"><b>4</b>{tx(b('External Students', 'Гадаад сурагчид'))}</span><span className="pill"><b>4</b>{tx(b('Guest Speakers', 'Зочин илтгэгчид'))}</span></div><div className="scroll-buttons"><button className="icon-button" onClick={() => scrollSpeakers(-260)} aria-label="Scroll speakers left" data-testid="button-speakers-left"><ArrowLeft size={16} /></button><button className="icon-button" onClick={() => scrollSpeakers(260)} aria-label="Scroll speakers right" data-testid="button-speakers-right"><ArrowRight size={16} /></button></div></div><div className="speaker-scroll" ref={speakerRef}>{speakers.map((info, index) => { const type = tx(info.type); const desc = tx(info.desc); const displayName = info.name ?? tx(b(`Speaker #${String(index + 1).padStart(2, '0')}`, `Илтгэгч #${String(index + 1).padStart(2, '0')}`)); return <button className="speaker-card" key={`${type}-${index}`} onClick={() => setSpeaker({ index: index + 1, type, name: info.name, photo: info.photo, desc })} data-testid={`button-speaker-${index + 1}`}><div className={`speaker-avatar ${info.photo ? 'has-photo' : ''}`}>{info.photo ? <img src={info.photo} alt={info.name ?? ''} /> : '?'}<div className="speaker-avatar-overlay"><p className="speaker-avatar-desc">{desc}</p><span className="speaker-avatar-cta">{tx(b('View full profile', 'Дэлгэрэнгүй харах'))}</span></div></div><div className="speaker-type">{type}</div><FitText className="speaker-name" text={displayName} /><p className="speaker-desc">{desc}</p></button>; })}</div></div></section>
+          <section className="section" id="speakers"><div className="wrap reveal"><div className="eyebrow">{tx(b('02 / On Stage', '02 / Тайзнаа'))}</div><h2 className="section-title">{tx(b('14 Live Speakers', '14 Илтгэгч'))}</h2><div className="speakers-head"><div className="pills"><span className="pill"><b>4</b>{tx(b('Local Students', 'Дотоод сурагчид'))}</span><span className="pill"><b>4</b>{tx(b('External Students', 'Гадаад сурагчид'))}</span><span className="pill"><b>3</b>{tx(b('Alumni', 'Төгсөгчид'))}</span><span className="pill"><b>3</b>{tx(b('Influencers', 'Инфлюэнсерүүд'))}</span></div><div className="scroll-buttons"><button className="icon-button" onClick={() => scrollSpeakers(-260)} aria-label="Scroll speakers left" data-testid="button-speakers-left"><ArrowLeft size={16} /></button><button className="icon-button" onClick={() => scrollSpeakers(260)} aria-label="Scroll speakers right" data-testid="button-speakers-right"><ArrowRight size={16} /></button></div></div><div className="speaker-scroll" ref={speakerRef}>{speakers.map((info, index) => { const type = tx(info.type); const desc = tx(info.desc); const displayName = info.name ?? tx(b(`Speaker #${String(index + 1).padStart(2, '0')}`, `Илтгэгч #${String(index + 1).padStart(2, '0')}`)); return <button className="speaker-card" key={`${type}-${index}`} onClick={() => setSpeaker({ index: index + 1, type, name: info.name, photo: info.photo, desc })} data-testid={`button-speaker-${index + 1}`}><div className={`speaker-avatar ${info.photo ? 'has-photo' : ''}`}>{info.photo ? <img src={info.photo} alt={info.name ?? ''} /> : '?'}<div className="speaker-avatar-overlay"><p className="speaker-avatar-desc">{desc}</p><span className="speaker-avatar-cta">{tx(b('View full profile', 'Дэлгэрэнгүй харах'))}</span></div></div><div className="speaker-type">{type}</div><FitText className="speaker-name" text={displayName} /><p className="speaker-desc">{desc}</p></button>; })}</div></div></section>
          <section className="section schedule" id="schedule"><div className="wrap reveal"><div className="eyebrow">{tx(b('03 / Timetable', '03 / Цагийн хуваарь'))}</div><h2 className="section-title">{tx(b('Event Schedule (Coming Soon)', 'Арга хэмжээний хөтөлбөр (Тун удахгүй)'))}</h2><p className="muted">{tx(b('Click on a session below to view details.', 'Доорх хэсэгт дарж дэлгэрэнгүй хуваарийг харна уу.'))}</p><div className="schedule-list">{sessions.map(([title, time, rows], index) => <div className={`session ${openSession === index ? 'open' : ''}`} key={title.en}><button className="session-header" onClick={() => setOpenSession(openSession === index ? null : index)} aria-expanded={openSession === index} data-testid={`button-schedule-${index}`}><div><h3>{tx(title)}</h3><span className="session-badge">{time}</span></div><span className="toggle">{openSession === index ? '−' : '+'}</span></button><div className="session-items">{rows.map(([rowTime, event]) => <div className="schedule-row" key={rowTime}><div className="time">{rowTime}</div><div className="event">{tx(event)}</div></div>)}</div></div>)}</div></div></section>
           <section className="section" id="contact"><div className="wrap reveal"><div className="eyebrow">{tx(b('04 / Get In Touch', '04 / Холбоо барих'))}</div><h2 className="section-title">{tx(b('Reach Out to Our Team', 'Бидэнтэй холбогдох'))}</h2><div className="contact-grid"><div className="info-card"><h3>{tx(b('Organizers', 'Зохион байгуулагчид'))}</h3><div className="organizer"><div><strong>Munkhtushig Sergelen</strong><p data-nosnippet="">{tx(b('Licensee, Lead Organizer & Chief Operations Director (Strategy & Execution)', 'Франчайз эзэмшигч, ахлах зохион байгуулагч ба үйл ажиллагааны ерөнхий захирал (стратеги ба гүйцэтгэл)'))}</p></div><span>01</span></div><div className="organizer"><div><strong>Munkh-Erdene Ganbold</strong><p>{tx(b('Co-organizer', 'Хамтран зохион байгуулагч'))}</p></div><span>02</span></div><div className="socials"><a href="mailto:hello@tedxubempathy.school"><Mail size={14} />Email</a></div></div><div className="form-card"><h3>{tx(b('Send a Message', 'Зурвас илгээх'))}</h3><form onSubmit={(event) => {
               event.preventDefault();
