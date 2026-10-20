@@ -457,8 +457,8 @@ const CENTER_SEATS = 84;
 const VIP_PER_SIDE = 8;
 const VIP_FIRST_SEAT = CENTER_SEATS + 1;
 const isVipSeat = (seat: number) => seat >= VIP_FIRST_SEAT;
-const DEFAULT_PRICE = 35000;
-const DEFAULT_VIP_PRICE = 40000;
+const DEFAULT_PRICE = 40000;
+const DEFAULT_VIP_PRICE = 45000;
 
 function SeatSelector() {
   const { tx } = useLang();
