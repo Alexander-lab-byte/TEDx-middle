@@ -32,12 +32,12 @@ export const config = {
   // Public site URL used to build the return link, e.g. https://www.tedxulaanbaatarempathyschoolyouth.com
   siteUrl: () => required('SITE_URL').trim().replace(/\/$/, ''),
   ticketPrice: () => {
-    const price = Number(process.env.TICKET_PRICE_MNT || 35000);
+    const price = Number(process.env.TICKET_PRICE_MNT || 40000);
     if (!Number.isInteger(price) || price <= 0) throw new Error('TICKET_PRICE_MNT must be a positive integer');
     return price;
   },
   vipPrice: () => {
-    const price = Number(process.env.VIP_PRICE_MNT || 40000);
+    const price = Number(process.env.VIP_PRICE_MNT || 45000);
     if (!Number.isInteger(price) || price <= 0) throw new Error('VIP_PRICE_MNT must be a positive integer');
     return price;
   },
