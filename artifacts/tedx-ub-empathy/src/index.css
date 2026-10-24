@@ -537,3 +537,24 @@ a { color: inherit; text-decoration: none; }
   .seat-grid.balcony-grid { grid-template-columns: repeat(8, 18px); }
   .balcony-rows { gap: 12px; }
 }
+
+/* --- Event-day live mode (10:30–16:00): animated red frame around the site --- */
+@property --live-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+.live-frame { position: fixed; inset: 0; z-index: 9998; pointer-events: none; animation: live-frame-in 1.4s cubic-bezier(.2,.8,.2,1) both; }
+.live-frame::before {
+  content: ''; position: absolute; inset: 0; padding: 5px;
+  background: conic-gradient(from var(--live-angle), #e62b1e, #ff7a6b 12%, rgba(230,43,30,.15) 30%, #e62b1e 50%, #ff7a6b 62%, rgba(230,43,30,.15) 80%, #e62b1e);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: live-spin 4s linear infinite;
+}
+.live-frame::after { content: ''; position: absolute; inset: 0; box-shadow: inset 0 0 28px 4px rgba(230,43,30,.55), inset 0 0 90px rgba(230,43,30,.18); animation: live-glow 2.4s ease-in-out infinite; }
+@keyframes live-spin { to { --live-angle: 360deg; } }
+@keyframes live-glow { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+@keyframes live-frame-in { 0% { opacity: 0; transform: scale(1.04); filter: brightness(2.2); } 40% { opacity: 1; filter: brightness(1.6); } 100% { opacity: 1; transform: scale(1); filter: none; } }
+.live-badge { position: fixed; left: 16px; bottom: 16px; z-index: 9999; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: #e62b1e; color: #fff; font: 800 11px var(--app-font-mono); letter-spacing: .12em; text-decoration: none; box-shadow: 0 6px 24px rgba(230,43,30,.5); animation: live-frame-in 1.4s .3s cubic-bezier(.2,.8,.2,1) both; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 0 rgba(255,255,255,.7); animation: live-dot 1.6s ease-out infinite; flex: none; }
+.countdown.is-live { display: inline-flex; align-items: center; gap: 10px; color: #fff; }
+.countdown.is-live .live-dot { background: #e62b1e; box-shadow: 0 0 0 0 rgba(230,43,30,.7); }
+@keyframes live-dot { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,.7); } 100% { box-shadow: 0 0 0 10px rgba(255,255,255,0); } }
+@media (prefers-reduced-motion: reduce) { .live-frame, .live-frame::before, .live-frame::after, .live-badge, .live-dot { animation: none; } }
