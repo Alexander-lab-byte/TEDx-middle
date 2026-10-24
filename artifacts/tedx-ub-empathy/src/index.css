@@ -243,7 +243,7 @@ a { color: inherit; text-decoration: none; }
 .session-badge { padding: 4px 9px; color: var(--white); border: 1px solid rgba(235,0,40,.6); border-radius: 999px; background: rgba(235,0,40,.14); font: 700 10px var(--app-font-mono); }
 .toggle { color: var(--ted-hi); font: 400 25px var(--app-font-mono); }
 .session-items { max-height: 0; overflow: hidden; transition: max-height .4s ease; }
-.session.open .session-items { max-height: 260px; }
+.session.open .session-items { max-height: 900px; }
 .schedule-row { display: grid; grid-template-columns: 170px 1fr; gap: 18px; padding: 14px 21px; border-top: 1px solid var(--line-soft); }
 .time { color: var(--ted-hi); font: 700 11px var(--app-font-mono); }.event { font-size: 13px; font-weight: 700; }
 

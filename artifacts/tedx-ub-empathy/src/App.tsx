@@ -156,9 +156,9 @@ function Footer({ showMap = false }: { showMap?: boolean }) {
 
 function Countdown() {
   const { tx } = useLang();
-  const [remaining, setRemaining] = useState(() => Math.max(0, new Date('2026-10-25T08:00:00+08:00').getTime() - Date.now()));
+  const [remaining, setRemaining] = useState(() => Math.max(0, new Date('2026-10-25T10:00:00+08:00').getTime() - Date.now()));
   useEffect(() => {
-    const timer = window.setInterval(() => setRemaining(Math.max(0, new Date('2026-10-25T08:00:00+08:00').getTime() - Date.now())), 1000);
+    const timer = window.setInterval(() => setRemaining(Math.max(0, new Date('2026-10-25T10:00:00+08:00').getTime() - Date.now())), 1000);
     return () => window.clearInterval(timer);
   }, []);
   const units = useMemo(() => {
@@ -613,10 +613,42 @@ function Home() {
     window.history.replaceState(null, '', `/#${id}`);
   };
   const sessions = [
-    [b('Morning Doors & Rehearsal', 'Өглөөний бүртгэл & бэлтгэл'), '08:00 AM – 10:15 AM', [['08:00 AM – 09:00 AM', b('Team & Speaker Preparation', 'Баг болон илтгэгчдийн бэлтгэл')], ['09:30 AM – 10:15 AM', b('Registration & Check-In', 'Бүртгэл & хүлээн авалт')]]],
-    [b('SESSION 1 — Local Roots & Discovery', 'ХЭСЭГ 1 — Орон нутгийн үнэ цэнэ'), '10:15 AM – 11:21 AM', [['10:15 AM', b('Opening & Welcome', 'Нээлтийн үйл ажиллагаа')], ['10:20 AM – 11:20 AM', b('Speaker Block 1 (Coming Soon)', 'Илтгэгчид 1 (тун удахгүй)')]]],
-    [b('SESSION 2 — Science, Technology & Systems', 'ХЭСЭГ 2 — Шинжлэх ухаан, технологи'), '12:00 PM – 01:12 PM', [['12:00 PM – 01:12 PM', b('Speaker Block 2 (Coming Soon)', 'Илтгэгчид 2 (тун удахгүй)')]]],
-    [b('SESSION 3 — Mind, Culture & Society', 'ХЭСЭГ 3 — Оюун ухаан, соёл, нийгэм'), '02:15 PM – 03:18 PM', [['02:15 PM – 03:18 PM', b('Speaker Block 3 (Coming Soon)', 'Илтгэгчид 3 (тун удахгүй)')]]],
+    [b('Doors Open & Opening', 'Хаалга нээгдэх & Нээлт'), '10:00 AM – 10:58 AM', [
+      ['10:00 – 10:30 AM', b('Check-in, coat check & coffee', 'Бүртгэл, хувцас тосох & кофе')],
+      ['10:30 – 10:35 AM', b('Guests take their seats · Host opens the event', 'Зочид суудалдаа суух · Хөтлөгч арга хэмжээг нээх')],
+      ['10:35 – 10:37 AM', b('Official TEDx intro video', 'TEDx-ийн албан ёсны танилцуулга видео')],
+      ['10:37 – 10:42 AM', b('Welcome from the licensee', 'Лиценз эзэмшигчийн мэндчилгээ')],
+      ['10:43 – 10:58 AM', b('Opening live music performance', 'Нээлтийн амьд хөгжмийн тоглолт')],
+    ]],
+    [b('SESSION 1 — Leaders & Knowledge', 'ХЭСЭГ 1 — Лидер ба мэдлэг'), '10:58 AM – 12:10 PM', [
+      ['11:00 – 11:18 AM', b('Tsogt Dorjderem', 'Цогт Дорждэрэм')],
+      ['11:20 – 11:26 AM', b('Amarbat Amarnaran', 'Амарбат Амарнаран')],
+      ['11:28 – 11:43 AM', b('Altankhuyag Norov', 'Норовын Алтанхуяг')],
+      ['11:45 – 11:53 AM', b('Dalai Davaadorj', 'Далай Даваадорж')],
+      ['11:55 AM – 12:06 PM', b('Manlaibaatar Purevsuren', 'Манлайбаатар Пүрэвсүрэн')],
+    ]],
+    [b('Buffet Lunch & Networking', 'Буфет үдийн зоог & танилцах'), '12:10 PM – 01:10 PM', [
+      ['12:10 – 01:10 PM', b('Buffet lunch and time to meet other guests', 'Буфет үдийн зоог, бусад зочидтой танилцах цаг')],
+    ]],
+    [b('SESSION 2 — Science & Art', 'ХЭСЭГ 2 — Шинжлэх ухаан ба урлаг'), '01:10 PM – 02:05 PM', [
+      ['01:15 – 01:25 PM', b('Mendbayar Byambadorj', 'Мэндбаяр Бямбадорж')],
+      ['01:27 – 01:34 PM', b('Shijir Davaa', 'Шижир Даваа')],
+      ['01:36 – 01:49 PM', b('Gan-Udram Ganbat (talk + piano)', 'Ган-Ундрам Ганбат (илтгэл + төгөлдөр хуур)')],
+      ['01:51 – 02:01 PM', b('Anarsaikhan Ariunbat', 'Анарсайхан Ариунбат')],
+    ]],
+    [b('Coffee, Tea & Desserts', 'Кофе, цай & амттан'), '02:05 PM – 02:35 PM', [
+      ['02:05 – 02:35 PM', b('Afternoon break in the foyer', 'Фойед үдээс хойшхи завсарлага')],
+    ]],
+    [b('SESSION 3 — The Future & Strength', 'ХЭСЭГ 3 — Ирээдүй ба хүч чадал'), '02:35 PM – 04:00 PM', [
+      ['02:39 – 02:45 PM', b('Acoustic piano opener', 'Төгөлдөр хуурын нээлтийн тоглолт')],
+      ['02:47 – 03:01 PM', b('Tsatsral Oyundalai', 'Цацрал Оюундалай')],
+      ['03:03 – 03:09 PM', b('Baatarkhuu Oyunbaatar', 'Баатархүү Оюунбаатар')],
+      ['03:11 – 03:19 PM', b('Gabriel Balane', 'Габриэль Балане')],
+      ['03:21 – 03:36 PM', b('Gan-Erdene Gansukh', 'Жижи Гансүх')],
+      ['03:38 – 03:53 PM', b('Closing live music performance', 'Хаалтын амьд хөгжмийн тоглолт')],
+      ['03:53 – 04:00 PM', b('Closing words & group photo', 'Хаалтын үг & нэгдсэн зураг')],
+      ['04:00 PM', b('Coat check return · See you next year!', 'Хувцас буцаан олгох · Дараа жил уулзъя!')],
+    ]],
   ] as [Bilingual, string, [string, Bilingual][]][];
   return (
     <>
@@ -647,7 +679,7 @@ function Home() {
            </div>
          </section>
           <section className="section" id="speakers"><div className="wrap reveal"><div className="eyebrow">{tx(b('02 / On Stage', '02 / Тайзнаа'))}</div><h2 className="section-title">{tx(b('14 Live Speakers', '14 Илтгэгч'))}</h2><div className="speakers-head"><div className="pills"><span className="pill"><b>4</b>{tx(b('Local Students', 'Дотоод сурагчид'))}</span><span className="pill"><b>4</b>{tx(b('External Students', 'Гадаад сурагчид'))}</span><span className="pill"><b>3</b>{tx(b('Alumni', 'Төгсөгчид'))}</span><span className="pill"><b>3</b>{tx(b('Distinguished Speakers', 'Эрхэм илтгэгчид'))}</span></div><div className="scroll-buttons"><button className="icon-button" onClick={() => scrollSpeakers(-260)} aria-label="Scroll speakers left" data-testid="button-speakers-left"><ArrowLeft size={16} /></button><button className="icon-button" onClick={() => scrollSpeakers(260)} aria-label="Scroll speakers right" data-testid="button-speakers-right"><ArrowRight size={16} /></button></div></div><div className="speaker-scroll" ref={speakerRef}>{speakers.map((info, index) => { const type = tx(info.type); const desc = tx(info.desc); const displayName = info.name ?? tx(b(`Speaker #${String(index + 1).padStart(2, '0')}`, `Илтгэгч #${String(index + 1).padStart(2, '0')}`)); return <button className="speaker-card" key={`${type}-${index}`} onClick={() => setSpeaker({ index: index + 1, type, name: info.name, photo: info.photo, desc })} data-testid={`button-speaker-${index + 1}`}><div className={`speaker-avatar ${info.photo ? 'has-photo' : ''}`}>{info.photo ? <img src={info.photo} alt={info.name ?? ''} /> : '?'}<div className="speaker-avatar-overlay"><p className="speaker-avatar-desc">{desc}</p><span className="speaker-avatar-cta">{tx(b('View full profile', 'Дэлгэрэнгүй харах'))}</span></div></div><div className="speaker-type">{type}</div><FitText className="speaker-name" text={displayName} /><p className="speaker-desc">{desc}</p></button>; })}</div></div></section>
-         <section className="section schedule" id="schedule"><div className="wrap reveal"><div className="eyebrow">{tx(b('03 / Timetable', '03 / Цагийн хуваарь'))}</div><h2 className="section-title">{tx(b('Event Schedule (Coming Soon)', 'Арга хэмжээний хөтөлбөр (Тун удахгүй)'))}</h2><p className="muted">{tx(b('Click on a session below to view details.', 'Доорх хэсэгт дарж дэлгэрэнгүй хуваарийг харна уу.'))}</p><div className="schedule-list">{sessions.map(([title, time, rows], index) => <div className={`session ${openSession === index ? 'open' : ''}`} key={title.en}><button className="session-header" onClick={() => setOpenSession(openSession === index ? null : index)} aria-expanded={openSession === index} data-testid={`button-schedule-${index}`}><div><h3>{tx(title)}</h3><span className="session-badge">{time}</span></div><span className="toggle">{openSession === index ? '−' : '+'}</span></button><div className="session-items">{rows.map(([rowTime, event]) => <div className="schedule-row" key={rowTime}><div className="time">{rowTime}</div><div className="event">{tx(event)}</div></div>)}</div></div>)}</div></div></section>
+         <section className="section schedule" id="schedule"><div className="wrap reveal"><div className="eyebrow">{tx(b('03 / Timetable', '03 / Цагийн хуваарь'))}</div><h2 className="section-title">{tx(b('Event Schedule · Sunday, Oct 25', 'Арга хэмжээний хөтөлбөр · 10-р сарын 25, Ням'))}</h2><p className="muted">{tx(b('Click on a session below to view details.', 'Доорх хэсэгт дарж дэлгэрэнгүй хуваарийг харна уу.'))}</p><div className="schedule-list">{sessions.map(([title, time, rows], index) => <div className={`session ${openSession === index ? 'open' : ''}`} key={title.en}><button className="session-header" onClick={() => setOpenSession(openSession === index ? null : index)} aria-expanded={openSession === index} data-testid={`button-schedule-${index}`}><div><h3>{tx(title)}</h3><span className="session-badge">{time}</span></div><span className="toggle">{openSession === index ? '−' : '+'}</span></button><div className="session-items">{rows.map(([rowTime, event]) => <div className="schedule-row" key={rowTime}><div className="time">{rowTime}</div><div className="event">{tx(event)}</div></div>)}</div></div>)}</div></div></section>
           <section className="section" id="contact"><div className="wrap reveal"><div className="eyebrow">{tx(b('04 / Get In Touch', '04 / Холбоо барих'))}</div><h2 className="section-title">{tx(b('Reach Out to Our Team', 'Бидэнтэй холбогдох'))}</h2><div className="contact-grid"><div className="info-card"><h3>{tx(b('Organizers', 'Зохион байгуулагчид'))}</h3><div className="organizer"><div><strong>Munkhtushig Sergelen</strong><p data-nosnippet="">{tx(b('Licensee, Lead Organizer & Chief Operations Director (Strategy & Execution)', 'Франчайз эзэмшигч, ахлах зохион байгуулагч ба үйл ажиллагааны ерөнхий захирал (стратеги ба гүйцэтгэл)'))}</p></div><span>01</span></div><div className="organizer"><div><strong>Munkh-Erdene Ganbold</strong><p>{tx(b('Co-organizer', 'Хамтран зохион байгуулагч'))}</p></div><span>02</span></div><div className="socials"><a href="mailto:hello@tedxubempathy.school"><Mail size={14} />Email</a></div></div><div className="form-card"><h3>{tx(b('Send a Message', 'Зурвас илгээх'))}</h3><form onSubmit={(event) => {
               event.preventDefault();
               const form = event.currentTarget;
