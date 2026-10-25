@@ -154,23 +154,46 @@ function Footer({ showMap = false }: { showMap?: boolean }) {
   </>;
 }
 
-function Countdown() {
-  const { tx } = useLang();
-  const [remaining, setRemaining] = useState(() => Math.max(0, new Date('2026-10-25T10:00:00+08:00').getTime() - Date.now()));
+// Event day: the countdown runs to 10:30, the site goes "live" (animated red
+// frame) from 10:30 to 16:00, then thanks everyone. Add ?live=1 to preview.
+const EVENT_START = new Date('2026-10-25T10:30:00+08:00').getTime();
+const EVENT_END = new Date('2026-10-25T16:00:00+08:00').getTime();
+type EventPhase = 'before' | 'live' | 'after';
+const forceLive = () => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('live') === '1';
+const phaseAt = (now: number): EventPhase => (forceLive() ? 'live' : now < EVENT_START ? 'before' : now < EVENT_END ? 'live' : 'after');
+
+function useNow() {
+  const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    const timer = window.setInterval(() => setRemaining(Math.max(0, new Date('2026-10-25T10:00:00+08:00').getTime() - Date.now())), 1000);
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, []);
-  const units = useMemo(() => {
-    if (!remaining) return [];
-    return [
-      [Math.floor(remaining / 86400000), b('Days', 'Өдөр')],
-      [Math.floor((remaining / 3600000) % 24), b('Hours', 'Цаг')],
-      [Math.floor((remaining / 60000) % 60), b('Mins', 'Минут')],
-      [Math.floor((remaining / 1000) % 60), b('Secs', 'Секунд')],
-    ] as [number, Bilingual][];
-  }, [remaining]);
-  if (!remaining) return <div className="countdown countdown-live"><span>{tx(b('Event is live today', 'Арга хэмжээ өнөөдөр болж байна'))}</span></div>;
+  return now;
+}
+
+function LiveFrame() {
+  const { tx } = useLang();
+  const phase = phaseAt(useNow());
+  if (phase !== 'live') return null;
+  return <>
+    <div className="live-frame" aria-hidden="true" data-testid="live-frame" />
+    <a className="live-badge" href="/#schedule"><span className="live-dot" />{tx(b('LIVE NOW', 'ШУУД ЯВАГДАЖ БАЙНА'))}</a>
+  </>;
+}
+
+function Countdown() {
+  const { tx } = useLang();
+  const now = useNow();
+  const phase = phaseAt(now);
+  const remaining = Math.max(0, EVENT_START - now);
+  const units = useMemo(() => [
+    [Math.floor(remaining / 86400000), b('Days', 'Өдөр')],
+    [Math.floor((remaining / 3600000) % 24), b('Hours', 'Цаг')],
+    [Math.floor((remaining / 60000) % 60), b('Mins', 'Минут')],
+    [Math.floor((remaining / 1000) % 60), b('Secs', 'Секунд')],
+  ] as [number, Bilingual][], [remaining]);
+  if (phase === 'live') return <div className="countdown countdown-live is-live" data-testid="status-countdown"><span className="live-dot" />{tx(b('We are live — ideas on stage now', 'Арга хэмжээ шууд явагдаж байна'))}</div>;
+  if (phase === 'after') return <div className="countdown countdown-live" data-testid="status-countdown"><span>{tx(b('Thank you for spreading ideas with us!', 'Бидэнтэй хамт санаа түгээсэнд баярлалаа!'))}</span></div>;
   return <div className="countdown" aria-label="Event countdown" data-testid="status-countdown">
     {units.map(([number, label]) => <div className="time-block" key={label.en}><strong>{String(number).padStart(2, '0')}</strong><label>{tx(label)}</label></div>)}
   </div>;
@@ -911,7 +934,7 @@ function Router() {
 function App() {
   const [lang, setLang] = useState<Lang>('en');
   const toggle = () => setLang((value) => value === 'en' ? 'mn' : 'en');
-  return <QueryClientProvider client={queryClient}><TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><LangContext.Provider value={{ lang, toggle, tx: (value) => value[lang] }}><Router /></LangContext.Provider></WouterRouter><Toaster /></TooltipProvider></QueryClientProvider>;
+  return <QueryClientProvider client={queryClient}><TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><LangContext.Provider value={{ lang, toggle, tx: (value) => value[lang] }}><Router /><LiveFrame /></LangContext.Provider></WouterRouter><Toaster /></TooltipProvider></QueryClientProvider>;
 }
 
 export default App;
