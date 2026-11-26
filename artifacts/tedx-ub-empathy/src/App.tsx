@@ -724,10 +724,79 @@ function Home() {
   );
 }
 
+interface TalkInfo {
+  speaker: string;
+  title: string;
+  // YouTube video id. Leave out while a talk is not on YouTube yet — the card
+  // then links to `link` (e.g. a TEDx channel search) and shows the speaker photo.
+  videoId?: string;
+  link?: string;
+  photo?: string;
+}
+
+// Published talks from the TEDx Talks YouTube channel, in running order.
+const talks: TalkInfo[] = [
+  { speaker: 'Altankhuyag Norov', title: 'Биеэ засаад гэрээ зас', videoId: 'C33UnzVw81E', photo: speakerPhoto('altankhuyag-norov.jpg') },
+  { speaker: 'Anarsaikhan Ariunbat', title: 'A Dispatch from the Universe', videoId: '7U0JA6VxyRY', photo: speakerPhoto('anarsaikhan.jpg') },
+  { speaker: 'Davaidorj Dalai', title: 'What Is Self-Interest?', videoId: 'eGHr0M29NOY', photo: speakerPhoto('dalai-davaadorj.jpg') },
+  { speaker: 'Oyunbaatar Baatarkhuu', title: 'An Algorithm Beyond Time', videoId: 'TXdnRvrl0XU', photo: speakerPhoto('baatarkhuu-oyunbaatar.jpg') },
+  { speaker: 'Byambadorj Mendbayar', title: 'Nature Doesn’t Have Subjects', videoId: 'LeXq7Y4XATQ', photo: speakerPhoto('mendbayar-byambadorj.jpg') },
+  { speaker: 'Balane Gabriel', title: 'Beyond the Thin Line', videoId: '64vxtLFcCiQ', photo: speakerPhoto('gabriel-balane.jpg') },
+  { speaker: 'Davaa Shijir', title: 'Bridging the Three Worlds', videoId: '-F4iYuVD8_A', photo: speakerPhoto('shijir-davaa.jpg') },
+  { speaker: 'Manlaibaatar Purevsuren', title: 'The Science of Not Knowing', videoId: 'sgWtFFNYimc', photo: speakerPhoto('manlaibaatar-purevsuren.jpg') },
+  { speaker: 'Amarnaran Amarbat', title: 'Same Assignment = Same Opportunity?', link: 'https://www.youtube.com/@TEDx/search?query=Amarnaran%20Amarbat', photo: speakerPhoto('amarbat-amarnaran.jpg') },
+];
+
 function Library() {
   const { tx } = useLang();
+  const [playing, setPlaying] = useState<string | null>(null);
   useScrollReveal();
-  return <><Nav /><main className="page-main talks-page"><div className="wrap"><div className="coming-soon-wrapper reveal"><h1 className="aesthetic-text">{tx(b('Coming Soon', 'Тун удахгүй'))}</h1><p className="coming-soon-sub">{tx(b('The full library of live ideas, student talks, and inspiration will be unlocked right here after the event concludes.', 'Арга хэмжээ дууссаны дараа сурагчдын болон зочдын бүх илтгэлийн бичлэгүүд энд байрших болно.'))}</p></div></div></main><Footer /></>;
+  return (
+    <>
+      <Nav />
+      <main className="page-main talks-page">
+        <section className="page-hero talks-hero"><div className="wrap reveal">
+          <div className="eyebrow">{tx(b('TEDxUlaanbaatar Empathy School Youth · Oct 25, 2026', 'TEDxUlaanbaatar Empathy School Youth · 2026.10.25'))}</div>
+          <h1>{tx(b('Published Talks', 'Нийтлэгдсэн илтгэлүүд'))}</h1>
+          <p className="muted">{tx(b('Watch the talks from our stage, now live on the official TEDx Talks YouTube channel.', 'Манай тайзнаа хэлэгдсэн илтгэлүүдийг TEDx Talks-ийн албан ёсны YouTube сувгаас үзээрэй.'))}</p>
+        </div></section>
+        <section className="section"><div className="wrap">
+          <div className="talks-grid">
+            {talks.map((talk, index) => {
+              const number = String(index + 1).padStart(2, '0');
+              const meta = <div className="talk-meta"><span className="talk-num">{number}</span><div><h3>{talk.title}</h3><p>{talk.speaker}</p></div></div>;
+              if (!talk.videoId) {
+                return (
+                  <a className="talk-card reveal" key={talk.speaker} href={talk.link} target="_blank" rel="noopener noreferrer" data-testid={`link-talk-${index + 1}`}>
+                    <div className="talk-thumb">{talk.photo && <img src={talk.photo} alt={talk.speaker} loading="lazy" />}<span className="talk-play talk-play-text">{tx(b('Watch on TEDx', 'TEDx дээр үзэх'))}</span></div>
+                    {meta}
+                  </a>
+                );
+              }
+              const isPlaying = playing === talk.videoId;
+              return (
+                <div className="talk-card reveal" key={talk.videoId}>
+                  <div className="talk-thumb">
+                    {isPlaying ? (
+                      <iframe src={`https://www.youtube-nocookie.com/embed/${talk.videoId}?autoplay=1&rel=0`} title={`${talk.speaker} — ${talk.title}`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                    ) : (
+                      <button type="button" onClick={() => setPlaying(talk.videoId!)} aria-label={`Play ${talk.title} by ${talk.speaker}`} data-testid={`button-talk-${index + 1}`}>
+                        <img src={`https://i.ytimg.com/vi/${talk.videoId}/hqdefault.jpg`} alt="" loading="lazy" onError={(event) => { if (talk.photo && !event.currentTarget.src.endsWith(talk.photo)) event.currentTarget.src = talk.photo; }} />
+                        <span className="talk-play" aria-hidden="true">▶</span>
+                      </button>
+                    )}
+                  </div>
+                  {meta}
+                  <a className="talk-yt" href={`https://www.youtube.com/watch?v=${talk.videoId}`} target="_blank" rel="noopener noreferrer">{tx(b('Open on YouTube ↗', 'YouTube-д нээх ↗'))}</a>
+                </div>
+              );
+            })}
+          </div>
+        </div></section>
+      </main>
+      <Footer />
+    </>
+  );
 }
 
 interface TeamMemberInfo {
